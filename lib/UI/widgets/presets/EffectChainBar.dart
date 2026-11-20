@@ -1,0 +1,118 @@
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:mighty_plug_manager/bluetooth/devices/NuxDevice.dart';
+
+import '../../../bluetooth/devices/presets/Mighty20Mk2Preset.dart';
+import '../../../bluetooth/devices/presets/Preset.dart';
+import 'EffectChainButton.dart';
+
+class EffectChainBar extends StatelessWidget {
+  static const double effectsChainPadding = 6;
+
+  final double maxHeight;
+  final NuxDevice device;
+  final Preset preset;
+  final bool reorderable;
+  final void Function(int) onTap;
+  final void Function(int) onDoubleTap;
+  final ReorderCallback onReorder;
+
+  const EffectChainBar(
+      {Key? key,
+      required this.maxHeight,
+      required this.device,
+      required this.preset,
+      required this.onTap,
+      required this.onDoubleTap,
+      required this.onReorder,
+      required this.reorderable})
+      : super(key: key);
+
+  EffectChainButton buildItem(context, index) {
+    if (preset is Mighty20Mk2Preset) {
+      index = (preset as Mighty20Mk2Preset).visibleSlotIndices[index];
+    }
+    var proc = preset.getFXIDFromSlot(index);
+    var effect = device.getProcessorInfoByFXID(proc);
+    bool selected = index == device.selectedSlot;
+
+    return EffectChainButton(
+        index: index,
+        effectInfo: effect!,
+        color: preset.effectColor(index),
+        enabled: preset.slotEnabled(index),
+        selected: selected,
+        reorderable: reorderable,
+        key: Key(index.toString()),
+        onTap: () => onTap(index),
+        onDoubleTap: () => onDoubleTap(index));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleSlotCount = preset is Mighty20Mk2Preset
+        ? (preset as Mighty20Mk2Preset).visibleSlotIndices.length
+        : device.effectsChainLength;
+
+    double constrainHeight = max(
+        min(
+            (MediaQuery.of(context).size.width - effectsChainPadding * 2) /
+                visibleSlotCount /
+                0.8,
+            maxHeight),
+        10);
+
+    Widget list;
+    if (reorderable) {
+      list = ReorderableList(
+        padding: const EdgeInsets.symmetric(horizontal: effectsChainPadding),
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: visibleSlotCount,
+        proxyDecorator: (widget, index, animation) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget? child) {
+              final double animValue =
+                  Curves.easeInOut.transform(animation.value);
+              final double offset = lerpDouble(0, -15, animValue)!;
+              return Material(
+                color: Colors.transparent,
+                child: Transform.translate(
+                  offset: Offset(0, offset),
+                  child: widget,
+                ),
+              );
+            },
+          );
+        },
+        itemBuilder: buildItem,
+        onReorder: (a, b) {
+          if (b > a) b--;
+          if (preset is Mighty20Mk2Preset) {
+            final slots = (preset as Mighty20Mk2Preset).visibleSlotIndices;
+            a = slots[a];
+            b = slots[b];
+          }
+          onReorder(a, b);
+        },
+      );
+    } else {
+      list = ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: effectsChainPadding),
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: visibleSlotCount,
+        itemBuilder: buildItem,
+      );
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: constrainHeight),
+      child: list,
+    );
+  }
+}

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:bluetooth_low_energy_platform_interface/bluetooth_low_energy_platform_interface.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +30,7 @@ class WindowsBleController extends BLEController {
   BLEDevice? _connectedDevice;
   GATTCharacteristic? _midiCharacteristic;
   bool _connectInProgress = false;
-  bool _notified = false;
+  bool _linkUp = false;
 
   /// Whether the automatic scan (started when Bluetooth reaches `poweredOn`)
   /// is currently active. Manual scans from Settings are not tracked here.
@@ -60,7 +60,7 @@ class WindowsBleController extends BLEController {
     setMidiSetupStatus(MidiSetupStatus.deviceIdle);
 
     // If Bluetooth was already powered on before the listener was attached,
-    // the stateChanged event will never fire for it — check the current
+    // the stateChanged event will never fire for it â€” check the current
     // state so the automatic scan is not missed.
     if (_central.state == BluetoothLowEnergyState.poweredOn) {
       _startAutoScan();
@@ -146,9 +146,7 @@ class WindowsBleController extends BLEController {
 
     debugPrint('WindowsBle: found $name (address ${peripheral.uuid})');
 
-    onScanResults([
-      WindowsBleScanResult(peripheral, args.advertisement)
-    ], []);
+    onScanResults([WindowsBleScanResult(peripheral, args.advertisement)], []);
     setMidiSetupStatus(MidiSetupStatus.deviceFound);
   }
 
@@ -157,15 +155,26 @@ class WindowsBleController extends BLEController {
     debugPrint(
         'WindowsBle: connection state changed: ${args.state} (${args.peripheral.uuid})');
 
-    if (args.state == ConnectionState.connected) {
-      setMidiSetupStatus(MidiSetupStatus.deviceConnected);
-    } else {
-      _midiCharacteristic = null;
-      if (_connectedDevice != null &&
-          _connectedDevice!.id == args.peripheral.uuid.toString()) {
-        _connectedDevice = null;
-      }
-      setMidiSetupStatus(MidiSetupStatus.deviceDisconnected);
+    switch (args.state) {
+      case ConnectionState.connected:
+        // Do not report `deviceConnected` here. WinRT raises this as soon as
+        // the link is up, before the GATT services are discovered and before
+        // notifications are enabled. NuxDeviceControl starts the connection
+        // handshake (firmware/preset requests) on `deviceConnected`, so the
+        // status is reported from connectToDevice once the MIDI characteristic
+        // can actually write and receive.
+        _linkUp = true;
+        break;
+      case ConnectionState.disconnected:
+        _linkUp = false;
+        _midiCharacteristic = null;
+        _connectInProgress = false;
+        if (_connectedDevice != null &&
+            _connectedDevice!.id == args.peripheral.uuid.toString()) {
+          _connectedDevice = null;
+          setMidiSetupStatus(MidiSetupStatus.deviceDisconnected);
+        }
+        break;
     }
   }
 
@@ -201,11 +210,15 @@ class WindowsBleController extends BLEController {
     } catch (e) {
       debugPrint("WindowsBle: connect error $e");
       _connectInProgress = false;
+      _linkUp = false;
       return null;
     }
 
     if (ampDevice) {
-      if (_connectedDevice != null) return null;
+      if (_connectedDevice != null) {
+        _abortConnection(peripheral, ampDevice);
+        return null;
+      }
       _connectedDevice = device;
     }
 
@@ -227,19 +240,29 @@ class WindowsBleController extends BLEController {
 
     if (midiCharacteristic == null) {
       debugPrint("WindowsBle: MIDI service/characteristic not found");
-      _connectInProgress = false;
+      _abortConnection(peripheral, ampDevice);
       return null;
     }
 
+    if (!_linkUp) {
+      debugPrint("WindowsBle: link lost during GATT discovery");
+      _abortConnection(peripheral, ampDevice);
+      return null;
+    }
+
+    // Create the receive stream before enabling notifications so data that
+    // arrives right after subscribing has somewhere to go.
+    final dataStream = _dataStream();
     _midiCharacteristic = midiCharacteristic;
 
-    if (ampDevice && !_notified) {
+    try {
       await _central.setCharacteristicNotifyState(
         peripheral,
         midiCharacteristic,
         state: true,
       );
-      _notified = true;
+    } catch (e) {
+      debugPrint("WindowsBle: enabling notifications failed $e");
     }
 
     _connectInProgress = false;
@@ -247,8 +270,22 @@ class WindowsBleController extends BLEController {
 
     if (ampDevice) {
       debugPrint("WindowsBle: amp device connected ${device.name}");
+      // The MIDI characteristic can now write and receive, so the connection
+      // is usable. This status starts the NuxDeviceControl handshake.
+      setMidiSetupStatus(MidiSetupStatus.deviceConnected);
     }
-    return BLEConnection(_dataStream());
+    return BLEConnection(dataStream);
+  }
+
+  /// Cleans up a failed connection attempt so a new one can be started.
+  void _abortConnection(Peripheral peripheral, bool ampDevice) {
+    _connectInProgress = false;
+    _linkUp = false;
+    _midiCharacteristic = null;
+    if (ampDevice) _connectedDevice = null;
+    _central.disconnect(peripheral).catchError((e) {
+      debugPrint("WindowsBle: cleanup disconnect error $e");
+    });
   }
 
   Stream<List<int>> _dataStream() {
@@ -292,7 +329,9 @@ class WindowsBleController extends BLEController {
       debugPrint("WindowsBle: disconnect error $e");
     });
     _midiCharacteristic = null;
-    _notified = false;
+    _connectInProgress = false;
+    _connectedDevice = null;
+    setMidiSetupStatus(MidiSetupStatus.deviceDisconnected);
   }
 
   @override

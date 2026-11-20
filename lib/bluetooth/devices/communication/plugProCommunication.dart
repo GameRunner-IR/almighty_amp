@@ -258,7 +258,7 @@ class PlugProCommunication extends DeviceCommunication {
 
   @override
   List<int> setChannel(int channel) {
-    return createPCMessage(channel);
+    return DeviceCommunication.createPCMessage(channel);
   }
 
   @override

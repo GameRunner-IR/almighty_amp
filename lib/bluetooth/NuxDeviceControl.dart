@@ -405,9 +405,9 @@ class NuxDeviceControl extends ChangeNotifier {
     sendParameter(param, false);
   }
 
-  void changeDeviceChannel(int channel) {
+  void changeDeviceChannel(int programNumber) {
     if (!isConnected) return;
-    sendBLEData(device.communication.setChannel(channel));
+    sendBLEData(device.communication.setChannel(programNumber));
   }
 
   void effectChangedListener(int slot) {
@@ -483,8 +483,7 @@ class NuxDeviceControl extends ChangeNotifier {
   }
 
   void resetToChannelDefaults() {
-    int channel = device.selectedChannel;
-    changeDeviceChannel(channel);
+    changeDeviceChannel(device.selectedProgramNumber);
     sendFullPresetSettings();
   }
 

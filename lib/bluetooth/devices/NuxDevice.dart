@@ -106,6 +106,22 @@ abstract class NuxDevice extends ChangeNotifier {
 
   int get selectedChannel => selectedChannelP;
 
+  /// Number of scenes available inside a single physical preset.
+  /// Devices without scenes expose a single scene.
+  int get proScenesCount => 1;
+
+  /// Currently selected scene (zero based) of the physical preset.
+  int get selectedProScene => 0;
+
+  /// MIDI Program Change number that recalls the current patch
+  /// (physical preset + scene).
+  int get selectedProgramNumber => selectedChannelP;
+
+  /// Selects a scene inside the current physical preset.
+  /// No-op on devices that do not expose scenes.
+  void setSelectedProScene(int scene,
+      {bool notifyBT = true, bool notifyUI = true}) {}
+
   void setFirmwareVersion(int ver);
 
   void setFirmwareVersionByIndex(int ver);
@@ -158,7 +174,7 @@ abstract class NuxDevice extends ChangeNotifier {
     if (selectedChannelP != chan) {
       selectedChannelP = chan;
       deviceControl.clearPresetData();
-      if (notifyBT) deviceControl.changeDeviceChannel(selectedChannelP);
+      if (notifyBT) deviceControl.changeDeviceChannel(selectedProgramNumber);
     }
     if (sendFullPreset) deviceControl.sendFullPresetSettings();
     if (deviceControl.isConnected) sendAmpLevel();
@@ -310,7 +326,8 @@ abstract class NuxDevice extends ChangeNotifier {
     nuxPresetsReceived = true;
   }
 
-  void _handleChannelChange(int index) {
+  @protected
+  void handleChannelChange(int index) {
     var newIndex = index;
 
     if (!nativeActiveChannelsSupport) {
@@ -335,6 +352,13 @@ abstract class NuxDevice extends ChangeNotifier {
     getPreset(selectedChannel).setupPresetFromNuxData();
     //immediately set the amp level
     sendAmpLevel();
+  }
+
+  /// Handles a Program Change received from the device.
+  /// Translates the program number into the preset/scene selection.
+  @protected
+  void handleProgramChange(int programNumber) {
+    if (programNumber < channelsCount) handleChannelChange(programNumber);
   }
 
   void _handleKnobReceiveData(List<int> data) {
@@ -403,11 +427,11 @@ abstract class NuxDevice extends ChangeNotifier {
         }
         break;
       case MidiMessageValues.programChange:
-        if (data[1] < channelsCount) _handleChannelChange(data[1]);
+        handleProgramChange(data[1]);
         break;
       case MidiMessageValues.controlChange:
         if (data[1] == channelChangeCC) {
-          _handleChannelChange(data[2]);
+          handleChannelChange(data[2]);
         } else if (data[1] == MidiCCValues.bCC_drumOnOff_No) {
           config.drumsEnabled = data[2] > 0 ? true : false;
           deviceControl.forceNotifyListeners();

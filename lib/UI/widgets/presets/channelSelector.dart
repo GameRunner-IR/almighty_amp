@@ -133,12 +133,20 @@ class _ChannelSelectorState extends State<ChannelSelector> {
 
       var button = GestureDetector(
         onTap: () {
-          if (widget.device.selectedChannel == i) return;
-          widget.device.setSelectedChannel(i,
-              notifyBT: true, sendFullPreset: false, notifyUI: true);
-          widget.device
-              .getPreset(widget.device.selectedChannel)
-              .setupPresetFromNuxData();
+          final device = widget.device;
+          final samePreset = device.selectedChannel == i;
+          // Devices with Pro Scenes recall scene 1 whenever the physical
+          // preset is selected, even if it is already the current one.
+          final resetScene =
+              device.proScenesCount > 1 && device.selectedProScene != 0;
+          if (samePreset && !resetScene) return;
+          if (samePreset) {
+            device.setSelectedProScene(0);
+          } else {
+            device.setSelectedChannel(i,
+                notifyBT: true, sendFullPreset: false, notifyUI: true);
+            device.getPreset(device.selectedChannel).setupPresetFromNuxData();
+          }
         },
         onLongPress: () {
           widget.device.toggleChannelActive(i);
@@ -162,6 +170,66 @@ class _ChannelSelectorState extends State<ChannelSelector> {
     }
 
     return buttons;
+  }
+
+  /// Pro Scene selectors for devices that store several patches inside one
+  /// physical preset (Mighty 20 MKII).
+  Widget _createProSceneBar() {
+    final device = widget.device;
+    final scenesCount = device.proScenesCount;
+    final selectedScene = device.selectedProScene;
+    final disabledColor = Theme.of(context).disabledColor;
+    final activeColor = device.getPreset(device.selectedChannel).channelColor;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: disabledColor)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Pro Scene", style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(width: 8),
+            for (int i = 0; i < scenesCount; i++)
+              GestureDetector(
+                onTap: () => device.setSelectedProScene(i),
+                child: Semantics(
+                  selected: selectedScene == i,
+                  label: "Pro Scene ${i + 1}",
+                  child: ExcludeSemantics(
+                    child: SizedBox(
+                      width: 46,
+                      height: AppThemeConfig.toggleButtonHeight(false),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            selectedScene == i
+                                ? Icons.circle
+                                : Icons.circle_outlined,
+                            color: selectedScene == i
+                                ? activeColor
+                                : disabledColor,
+                            size: 30,
+                          ),
+                          Text(
+                            "${i + 1}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
+          ],
+        ),
+      ),
+    );
   }
 
   qrPopupSelection(pos) async {
@@ -292,14 +360,21 @@ class _ChannelSelectorState extends State<ChannelSelector> {
                   child: Container(
                     constraints: const BoxConstraints(minHeight: 60),
                     color: Colors.grey[900],
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Wrap(
-                          alignment: WrapAlignment.center,
-                          runAlignment: WrapAlignment.center,
-                          children: _createButtons(constraints.maxWidth),
-                        );
-                      },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Wrap(
+                              alignment: WrapAlignment.center,
+                              runAlignment: WrapAlignment.center,
+                              children: _createButtons(constraints.maxWidth),
+                            );
+                          },
+                        ),
+                        if (widget.device.proScenesCount > 1)
+                          _createProSceneBar(),
+                      ],
                     ),
                   ),
                 ),

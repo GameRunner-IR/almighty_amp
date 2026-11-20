@@ -93,7 +93,8 @@ abstract class DeviceCommunication {
     return msg;
   }
 
-  List<int> createPCMessage(int programNumber) {
+  /// Builds the BLE-MIDI Program Change packet used to recall a patch.
+  static List<int> createPCMessage(int programNumber) {
     var msg = List<int>.filled(4, 0);
     msg[0] = 0x80;
     msg[1] = 0x80;

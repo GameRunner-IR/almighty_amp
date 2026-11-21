@@ -46,7 +46,7 @@ class PlugProPreset extends Preset {
   @override
   final List<CabinetPro> cabinetList = <CabinetPro>[];
   final List<Modulation> modulationList = <Modulation>[];
-  final List<Reverb> _reverbList = <Reverb>[];
+  final List<Reverb> reverbList = <Reverb>[];
   @override
   final List<Amplifier> amplifierList = <Amplifier>[];
   final List<DelayPro> delayList = <DelayPro>[];
@@ -209,7 +209,7 @@ class PlugProPreset extends Preset {
       PhiDelayPro()
     ]);
 
-    _reverbList.addAll([
+    reverbList.addAll([
       RoomReverb(),
       HallReverb(),
       PlateReverb(),
@@ -374,7 +374,7 @@ class PlugProPreset extends Preset {
       case PresetDataIndexPlugPro.Head_iDLY:
         return delayList;
       case PresetDataIndexPlugPro.Head_iRVB:
-        return _reverbList;
+        return reverbList;
     }
     return <Processor>[];
   }

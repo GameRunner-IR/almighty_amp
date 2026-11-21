@@ -64,8 +64,11 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
 
   NuxMighty20Mk2(super.devControl) {
     for (int i = 0; i < presets.length; i++) {
-      presets[i] = Mighty20Mk2Preset(
-          device: this, channel: i, channelName: channelNames[i]);
+      // Show only the preset number in the UI (1-7), without the "Channel"
+      // prefix used by other Plug Pro family devices.
+      presets[i] =
+          Mighty20Mk2Preset(device: this, channel: i, channelName: "${i + 1}");
+      channelNames[i] = "${i + 1}";
     }
   }
 

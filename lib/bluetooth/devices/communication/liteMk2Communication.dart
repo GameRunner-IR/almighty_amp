@@ -1,4 +1,4 @@
-import 'package:mighty_plug_manager/bluetooth/devices/communication/plugProCommunication.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/plugProCommunication.dart';
 import '../NuxDevice.dart';
 
 class LiteMk2Communication extends PlugProCommunication {

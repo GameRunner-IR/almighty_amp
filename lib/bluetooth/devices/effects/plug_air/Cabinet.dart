@@ -2,8 +2,8 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'dart:core';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 
 import '../../NuxConstants.dart';
 import '../../value_formatters/ValueFormatter.dart';

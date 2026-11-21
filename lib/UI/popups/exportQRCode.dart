@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/platform/fileSaver.dart';
+import 'package:almighty_amp/platform/fileSaver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:path/path.dart' as path;

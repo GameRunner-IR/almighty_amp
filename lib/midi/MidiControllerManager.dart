@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:mighty_plug_manager/bluetooth/bleMidiHandler.dart';
-import 'package:mighty_plug_manager/midi/UsbMidiManager.dart';
-import 'package:mighty_plug_manager/midi/controllers/BleMidiController.dart';
-import 'package:mighty_plug_manager/midi/controllers/HidController.dart';
+import 'package:almighty_amp/bluetooth/bleMidiHandler.dart';
+import 'package:almighty_amp/midi/UsbMidiManager.dart';
+import 'package:almighty_amp/midi/controllers/BleMidiController.dart';
+import 'package:almighty_amp/midi/controllers/HidController.dart';
 import 'package:path/path.dart' as path;
 
 import '../bluetooth/ble_controllers/BLEController.dart';

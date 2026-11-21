@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 
 import '../UI/widgets/thickRangeSlider.dart';
 import '../bluetooth/devices/NuxDevice.dart';

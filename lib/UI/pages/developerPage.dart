@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/nestedWillPopScope.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/numberPicker.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/bluetooth/bleMidiHandler.dart';
+import 'package:almighty_amp/UI/widgets/common/nestedWillPopScope.dart';
+import 'package:almighty_amp/UI/widgets/common/numberPicker.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/bleMidiHandler.dart';
 
 import '../../bluetooth/devices/NuxConstants.dart';
 

@@ -2,9 +2,9 @@
 // This must not affect other devices (they keep PlugProPreset's lists).
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_pro/Delay.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_pro/Reverb.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/Mighty20Mk2Preset.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_pro/Delay.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_pro/Reverb.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/Mighty20Mk2Preset.dart';
 
 void main() {
   test('MKII delay list has the correct models in order', () {

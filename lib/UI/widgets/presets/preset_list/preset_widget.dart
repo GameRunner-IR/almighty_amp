@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxDevice.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxDevice.dart';
 
 import '../../../../audio/trackdata/trackData.dart';
 import '../../../../bluetooth/NuxDeviceControl.dart';

@@ -1,7 +1,7 @@
 // (c) 2020-2021 Dian Iliev (Tuntorius)
 // This code is licensed under MIT license (see LICENSE.md for details)
 
-package com.tuntori.mightieramp
+package ir.gamerunner.almightyamp
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity

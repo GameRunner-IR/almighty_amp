@@ -3,9 +3,9 @@
 
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightyPlugPro.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/plugProCommunication.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_pro/EmptyEffects.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugPro.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/plugProCommunication.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_pro/EmptyEffects.dart';
 
 import '../../NuxDeviceControl.dart';
 import '../NuxConstants.dart';

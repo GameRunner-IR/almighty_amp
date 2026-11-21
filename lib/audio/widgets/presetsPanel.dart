@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/selectPreset.dart';
-import 'package:mighty_plug_manager/audio/models/trackAutomation.dart';
+import 'package:almighty_amp/UI/popups/selectPreset.dart';
+import 'package:almighty_amp/audio/models/trackAutomation.dart';
 import '../automationController.dart';
 
 class PresetsPanel extends StatelessWidget {

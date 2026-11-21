@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/drum_editor/drumEditor.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/modeControlRegular.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/UI/pages/drum_editor/drumEditor.dart';
+import 'package:almighty_amp/UI/widgets/common/modeControlRegular.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
 
 import '../../../modules/tempo_trainer.dart';
 import '../../widgets/thickRangeSlider.dart';

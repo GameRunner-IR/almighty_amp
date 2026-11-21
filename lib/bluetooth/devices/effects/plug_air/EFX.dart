@@ -1,8 +1,8 @@
 // (c) 2020-2021 Dian Iliev (Tuntorius)
 // This code is licensed under MIT license (see LICENSE.md for details)
 
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightyPlugAir.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_air/EFXv2.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugAir.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_air/EFXv2.dart';
 
 import '../../NuxConstants.dart';
 import '../../value_formatters/ValueFormatter.dart';

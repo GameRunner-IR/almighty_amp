@@ -3,8 +3,8 @@
 //
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/audio/online_sources/backingTracksCoSource.dart';
-import 'package:mighty_plug_manager/audio/online_sources/guitarBackingTracksSource.dart';
+import 'package:almighty_amp/audio/online_sources/backingTracksCoSource.dart';
+import 'package:almighty_amp/audio/online_sources/guitarBackingTracksSource.dart';
 
 import 'search_screen.dart';
 

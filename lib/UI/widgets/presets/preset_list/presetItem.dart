@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/widgets/presets/preset_list/presetEffectPreview.dart';
+import 'package:almighty_amp/UI/widgets/presets/preset_list/presetEffectPreview.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 import '/bluetooth/NuxDeviceControl.dart';
 import '/bluetooth/devices/NuxDevice.dart';
@@ -112,7 +112,15 @@ class PresetItem extends StatelessWidget {
     var dev = NuxDeviceControl.instance()
             .getDeviceFromPresetClass(item["product_id"]) ??
         device;
-    Color color = dev.getPreset(0).channelColorsList[item["channel"]];
+    int ch = item["channel"] ?? 0;
+    final colors = dev.getPreset(0).channelColorsList;
+    if (dev.proScenesCount > 1) {
+      ch = ch ~/ dev.proScenesCount;
+    }
+    if (ch < 0 || ch >= colors.length) {
+      ch = colors.isNotEmpty ? ch % colors.length : 0;
+    }
+    Color color = colors.isNotEmpty ? colors[ch] : Colors.grey;
 
     if (!enabled) color = TinyColor.fromColor(color).desaturate(90).color;
 

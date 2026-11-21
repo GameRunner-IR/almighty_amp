@@ -1,8 +1,8 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:bluetooth_low_energy_platform_interface/bluetooth_low_energy_platform_interface.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mighty_plug_manager/utilities/list_extenstions.dart';
+import 'package:almighty_amp/utilities/list_extenstions.dart';
 
 import 'BLEController.dart';
 
@@ -60,7 +60,7 @@ class WindowsBleController extends BLEController {
     setMidiSetupStatus(MidiSetupStatus.deviceIdle);
 
     // If Bluetooth was already powered on before the listener was attached,
-    // the stateChanged event will never fire for it â€” check the current
+    // the stateChanged event will never fire for it — check the current
     // state so the automatic scan is not missed.
     if (_central.state == BluetoothLowEnergyState.poweredOn) {
       _startAutoScan();

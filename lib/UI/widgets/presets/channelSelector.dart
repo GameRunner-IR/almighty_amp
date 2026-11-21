@@ -3,10 +3,10 @@
 //
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/alertDialogs.dart';
-import 'package:mighty_plug_manager/UI/popups/exportQRCode.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/platform/fileSaver.dart';
+import 'package:almighty_amp/UI/popups/alertDialogs.dart';
+import 'package:almighty_amp/UI/popups/exportQRCode.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/platform/fileSaver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_utils/qr_utils.dart';
 import '../../../bluetooth/devices/presets/Preset.dart';

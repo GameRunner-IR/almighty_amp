@@ -3,8 +3,8 @@
 // BLE-MIDI packet.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMighty20Mk2.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/communication.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMighty20Mk2.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/communication.dart';
 
 void main() {
   // Physical preset -> program numbers of Pro Scenes 1, 2 and 3.

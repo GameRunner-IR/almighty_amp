@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxDevice.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/communication.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/Processor.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/PlugProPreset.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxDevice.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/communication.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/Processor.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/PlugProPreset.dart';
 
 import '../../UI/pages/device_specific_settings/LiteMk2Settings.dart';
 import 'NuxConstants.dart';

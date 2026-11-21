@@ -5,8 +5,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:audio_picker/audio_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mighty_plug_manager/audio/models/jamTrack.dart';
-import 'package:mighty_plug_manager/audio/models/setlist.dart';
+import 'package:almighty_amp/audio/models/jamTrack.dart';
+import 'package:almighty_amp/audio/models/setlist.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
@@ -47,7 +47,9 @@ class TrackData {
     _tracksData = <JamTrack>[];
     await _getDirectory();
     await _loadTracks();
-    AudioPicker().regusterOnStaleBookmark(_onBookmarkUpdated);
+    if (PlatformUtils.isIOS) {
+      AudioPicker().regusterOnStaleBookmark(_onBookmarkUpdated);
+    }
   }
 
   _getDirectory() async {

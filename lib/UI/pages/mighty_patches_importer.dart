@@ -3,9 +3,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/savePreset.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/nestedWillPopScope.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/UI/popups/savePreset.dart';
+import 'package:almighty_amp/UI/widgets/common/nestedWillPopScope.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_utils/qr_utils.dart';

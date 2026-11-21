@@ -2,8 +2,8 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/device_specific_settings/PlugAirSettings.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/device_data/processors_list.dart';
+import 'package:almighty_amp/UI/pages/device_specific_settings/PlugAirSettings.dart';
+import 'package:almighty_amp/bluetooth/devices/device_data/processors_list.dart';
 import '../bleMidiHandler.dart';
 import 'communication/communication.dart';
 import 'communication/plugAirCommunication.dart';

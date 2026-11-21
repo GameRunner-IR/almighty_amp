@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:mighty_plug_manager/audio/models/jamTrack.dart';
-import 'package:mighty_plug_manager/audio/trackdata/trackData.dart';
+import 'package:almighty_amp/audio/models/jamTrack.dart';
+import 'package:almighty_amp/audio/trackdata/trackData.dart';
 
 class SetlistItem {
   String trackUuid = "";

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/hotkeysSetup.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/features/tuner.dart';
-import 'package:mighty_plug_manager/midi/ControllerConstants.dart';
-import 'package:mighty_plug_manager/midi/controllers/MidiController.dart';
+import 'package:almighty_amp/UI/pages/hotkeysSetup.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/devices/features/tuner.dart';
+import 'package:almighty_amp/midi/ControllerConstants.dart';
+import 'package:almighty_amp/midi/controllers/MidiController.dart';
 
 import '../../bluetooth/devices/features/looper.dart';
 

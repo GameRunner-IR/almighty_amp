@@ -4,11 +4,11 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/liteMk2Communication.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/liteMk2/delay.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/liteMk2/efx.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/liteMk2/reverb.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/preset_constants.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/liteMk2Communication.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/liteMk2/delay.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/liteMk2/efx.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/liteMk2/reverb.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/preset_constants.dart';
 
 import '../NuxConstants.dart';
 import '../NuxDevice.dart';

@@ -8,14 +8,14 @@ import 'package:audio_waveform/audio_waveform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:mighty_plug_manager/UI/theme.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/nestedWillPopScope.dart';
-import 'package:mighty_plug_manager/audio/automationController.dart';
-import 'package:mighty_plug_manager/audio/online_sources/sourceResolver.dart';
-import 'package:mighty_plug_manager/audio/widgets/presetsPanel.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxDevice.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/UI/theme.dart';
+import 'package:almighty_amp/UI/widgets/common/nestedWillPopScope.dart';
+import 'package:almighty_amp/audio/automationController.dart';
+import 'package:almighty_amp/audio/online_sources/sourceResolver.dart';
+import 'package:almighty_amp/audio/widgets/presetsPanel.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxDevice.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 import 'package:page_view_indicators/circle_page_indicator.dart';
 
 import 'models/jamTrack.dart';
@@ -110,26 +110,59 @@ class _AudioEditorState extends State<AudioEditor> {
     _resolvedPath = await SourceResolver.getSourceUrl(path);
     print("Resolved path $_resolvedPath");
 
+    if (Platform.isWindows) {
+      await _createPlaceholderWaveform();
+      return;
+    }
+
     bool legacy = Platform.isAndroid &&
         SharedPrefs().getInt(SettingsKeys.legacyDecoder, 0) != 0;
-    await decoder.open(_resolvedPath, legacy);
+    try {
+      await decoder.open(_resolvedPath, legacy);
 
-    decoder.decode(() {
-      wfData = WaveformData(maxValue: 1, data: decoder.samples);
-    }, () {
-      if (pageLeft) {
+      decoder.decode(() {
+        wfData = WaveformData(maxValue: 1, data: decoder.samples);
+      }, () {
+        if (pageLeft) {
+          freeDecoder();
+          return false;
+        }
+        wfData!.setUpdate();
+        setState(() {});
+        return true;
+      }, () {
+        //final update
+        wfData!.setReady();
+        setState(() {});
         freeDecoder();
-        return false;
+      });
+    } catch (e) {
+      debugPrint("Waveform decode failed: $e");
+      await _createPlaceholderWaveform();
+    }
+  }
+
+  Future<void> _createPlaceholderWaveform() async {
+    try {
+      Duration? d = automation.duration;
+      if (d.inMilliseconds == 0) {
+        d = await automation.player.durationStream
+            .firstWhere((v) => v != null && v.inMilliseconds > 0)
+            .timeout(const Duration(seconds: 10), onTimeout: () => null);
       }
-      wfData!.setUpdate();
-      setState(() {});
-      return true;
-    }, () {
-      //final update
-      wfData!.setReady();
-      setState(() {});
+      final ms = (d?.inMilliseconds ?? 0);
+      final samplesCount = ms > 0 ? (ms / 50).round().clamp(200, 4000) : 1000;
+      final data = List<int>.filled(samplesCount, 1);
+      if (!mounted || pageLeft) return;
+      setState(() {
+        wfData = WaveformData(maxValue: 1, data: data);
+        wfData!.setReady();
+      });
+    } catch (e) {
+      debugPrint("Placeholder waveform failed: $e");
+    } finally {
       freeDecoder();
-    });
+    }
   }
 
   void freeDecoder() {
@@ -137,7 +170,10 @@ class _AudioEditorState extends State<AudioEditor> {
   }
 
   int sampleToMs(int sample) {
+    if (wfData == null || wfData!.data.isEmpty) return 0;
     var percentage = sample / wfData!.data.length;
+    final durMs = automation.duration.inMilliseconds;
+    if (durMs > 0) return (percentage * durMs).round();
     return (percentage * decoder.duration * 1000).round();
   }
 
@@ -149,9 +185,11 @@ class _AudioEditorState extends State<AudioEditor> {
   void playPositionUpdate(Duration position) {
     setState(() {
       var posMs = max(position.inMilliseconds - latency, 0);
-      currentSample = (decoder.samples.length *
-              (posMs / automation.duration.inMilliseconds))
-          .floor();
+      final totalSamples = wfData?.data.length ?? decoder.samples.length;
+      final durMs = automation.duration.inMilliseconds;
+      if (totalSamples > 0 && durMs > 0) {
+        currentSample = (totalSamples * (posMs / durMs)).floor();
+      }
     });
   }
 

@@ -3,7 +3,7 @@
 
 import 'dart:ui';
 
-import 'package:mighty_plug_manager/bluetooth/devices/presets/preset_constants.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/preset_constants.dart';
 
 import '../NuxDevice.dart';
 import '../effects/Processor.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/mightierIcons.dart';
-import 'package:mighty_plug_manager/UI/widgets/NuxAppBar.dart';
-import 'package:mighty_plug_manager/UI/widgets/VolumeDrawer.dart';
+import 'package:almighty_amp/UI/mightierIcons.dart';
+import 'package:almighty_amp/UI/widgets/NuxAppBar.dart';
+import 'package:almighty_amp/UI/widgets/VolumeDrawer.dart';
 
 final _tiles = <TileModel>[
   const TileModel(0, 'Editor', MightierIcons.sliders),

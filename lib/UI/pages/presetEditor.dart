@@ -3,9 +3,9 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/alertDialogs.dart';
-import 'package:mighty_plug_manager/audio/setlist_player/setlistPlayerState.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/UI/popups/alertDialogs.dart';
+import 'package:almighty_amp/audio/setlist_player/setlistPlayerState.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
 import '../popups/savePreset.dart';
 import '../utils.dart';
 import '../widgets/presets/channelSelector.dart';

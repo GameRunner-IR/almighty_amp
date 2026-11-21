@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/widgets/verticalThickSlider.dart';
+import 'package:almighty_amp/UI/widgets/verticalThickSlider.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 import '../../../../bluetooth/devices/effects/Processor.dart';
 import '../../../utils.dart';

@@ -2,10 +2,10 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/device_specific_settings/eq/bt_audio_options.dart';
-import 'package:mighty_plug_manager/UI/widgets/presets/effectEditors/EqualizerEditor.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightyPlugPro.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/plugProCommunication.dart';
+import 'package:almighty_amp/UI/pages/device_specific_settings/eq/bt_audio_options.dart';
+import 'package:almighty_amp/UI/widgets/presets/effectEditors/EqualizerEditor.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugPro.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/plugProCommunication.dart';
 import '../../../../bluetooth/NuxDeviceControl.dart';
 import '../../../../bluetooth/devices/effects/Processor.dart';
 import '../../../../bluetooth/devices/effects/plug_pro/EQ.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
-import 'package:mighty_plug_manager/midi/controllers/UsbMidiController.dart';
+import 'package:almighty_amp/midi/MidiControllerManager.dart';
+import 'package:almighty_amp/midi/controllers/UsbMidiController.dart';
 
 import '../platform/platformUtils.dart';
 import 'ControllerConstants.dart';

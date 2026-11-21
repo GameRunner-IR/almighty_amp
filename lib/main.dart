@@ -6,9 +6,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/DebugConsolePage.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/UI/pages/DebugConsolePage.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 
 //pages
 import 'UI/mainTabs.dart';
@@ -63,7 +63,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mightier Amp',
+      title: 'Almighty Amp',
       theme: getTheme(),
       home: MainTabs(),
       scrollBehavior: const MaterialScrollBehavior().copyWith(

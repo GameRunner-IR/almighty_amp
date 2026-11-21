@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightyPlugAir.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugAir.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 

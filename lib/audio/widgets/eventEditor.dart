@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/selectPreset.dart';
-import 'package:mighty_plug_manager/UI/widgets/thickSlider.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/preset_constants.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
+import 'package:almighty_amp/UI/popups/selectPreset.dart';
+import 'package:almighty_amp/UI/widgets/thickSlider.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/preset_constants.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
 import '../models/trackAutomation.dart';
 
 class EventEditor {

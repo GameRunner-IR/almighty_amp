@@ -1,8 +1,8 @@
 // (c) 2020-2021 Dian Iliev (Tuntorius)
 // This code is licensed under MIT license (see LICENSE.md for details)
 
-import 'package:mighty_plug_manager/bluetooth/devices/effects/MidiControllerHandles.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/value_formatters/ValueFormatter.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/MidiControllerHandles.dart';
+import 'package:almighty_amp/bluetooth/devices/value_formatters/ValueFormatter.dart';
 
 import '../../NuxConstants.dart';
 import '../../NuxMightyPlugAir.dart';

@@ -6,9 +6,9 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/communication.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/communication.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 import 'package:qr_utils/qr_utils.dart';
 
 import '../../modules/cloud/presetEncoder.dart';
@@ -704,7 +704,8 @@ abstract class NuxDevice extends ChangeNotifier {
 
       var proc = p.getFXIDFromSlot(i);
       var effect = getProcessorInfoByFXID(proc);
-      mainJson[effect!.keyName] = fxData;
+      if (effect == null) continue;
+      mainJson[effect.keyName] = fxData;
     }
 
     // Save settings for not selected effects
@@ -738,7 +739,8 @@ abstract class NuxDevice extends ChangeNotifier {
       if (fxSlotList.isNotEmpty) {
         var proc = p.getFXIDFromSlot(i);
         var effect = getProcessorInfoByFXID(proc);
-        inactiveFX[effect!.keyName] = fxSlotList;
+        if (effect == null) continue;
+        inactiveFX[effect.keyName] = fxSlotList;
       }
     }
 

@@ -1,5 +1,5 @@
 import 'package:flutter_midi_command/flutter_midi_command.dart';
-import 'package:mighty_plug_manager/midi/controllers/MidiController.dart';
+import 'package:almighty_amp/midi/controllers/MidiController.dart';
 
 class UsbMidiController extends MidiController {
   MidiDevice device;

@@ -2,13 +2,13 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/drum_editor/drum_eq_bottom_sheet.dart';
-import 'package:mighty_plug_manager/UI/pages/drum_editor/drumstyle_scroll_picker.dart';
-import 'package:mighty_plug_manager/UI/pages/drum_editor/tap_buttons.dart';
-import 'package:mighty_plug_manager/UI/widgets/circular_button.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/modeControlRegular.dart';
-import 'package:mighty_plug_manager/UI/pages/drum_editor/tempoTrainerSheet.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/features/drumsTone.dart';
+import 'package:almighty_amp/UI/pages/drum_editor/drum_eq_bottom_sheet.dart';
+import 'package:almighty_amp/UI/pages/drum_editor/drumstyle_scroll_picker.dart';
+import 'package:almighty_amp/UI/pages/drum_editor/tap_buttons.dart';
+import 'package:almighty_amp/UI/widgets/circular_button.dart';
+import 'package:almighty_amp/UI/widgets/common/modeControlRegular.dart';
+import 'package:almighty_amp/UI/pages/drum_editor/tempoTrainerSheet.dart';
+import 'package:almighty_amp/bluetooth/devices/features/drumsTone.dart';
 import '../../../bluetooth/devices/NuxDevice.dart';
 import '../../../bluetooth/NuxDeviceControl.dart';
 import '../../../bluetooth/devices/features/looper.dart';

@@ -2,7 +2,7 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
 import '../../bluetooth/devices/presets/Preset.dart';
 import '../widgets/scrollParent.dart';
 import '../../bluetooth/devices/NuxDevice.dart';
@@ -10,7 +10,7 @@ import '../../platform/presetsStorage.dart';
 import 'alertDialogs.dart';
 
 class SavePresetDialog {
-  static final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   final categoryCtrl = TextEditingController();
   final nameCtrl = TextEditingController();
   final parentScroll = ScrollController();
@@ -123,25 +123,40 @@ class SavePresetDialog {
             TextButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  //save and pop
-
-                  if (PresetsStorage().presetExists(
-                      nameCtrl.value.text, categoryCtrl.value.text)) {
-                    //overwriting preset
-                    AlertDialogs.showConfirmDialog(context,
-                        title: "Confirm",
-                        description: "Overwrite existing preset?",
-                        cancelButton: "Cancel",
-                        confirmButton: "Overwrite",
-                        confirmColor: Colors.red, onConfirm: (overwrite) {
-                      if (overwrite) {
-                        savePreset(context);
-                        Navigator.of(context).pop();
-                      }
-                    });
-                  } else {
-                    savePreset(context);
-                    Navigator.of(context).pop();
+                  try {
+                    if (PresetsStorage().presetExists(
+                        nameCtrl.value.text, categoryCtrl.value.text)) {
+                      AlertDialogs.showConfirmDialog(context,
+                          title: "Confirm",
+                          description: "Overwrite existing preset?",
+                          cancelButton: "Cancel",
+                          confirmButton: "Overwrite",
+                          confirmColor: Colors.red, onConfirm: (overwrite) {
+                        if (overwrite) {
+                          try {
+                            savePreset(context);
+                            if (context.mounted) Navigator.of(context).pop();
+                          } catch (e) {
+                            if (context.mounted) {
+                              AlertDialogs.showInfoDialog(context,
+                                  title: "Error",
+                                  description: "Failed to save preset: $e",
+                                  confirmButton: "OK");
+                            }
+                          }
+                        }
+                      });
+                    } else {
+                      savePreset(context);
+                      if (context.mounted) Navigator.of(context).pop();
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      AlertDialogs.showInfoDialog(context,
+                          title: "Error",
+                          description: "Failed to save preset: $e",
+                          confirmButton: "OK");
+                    }
                   }
                 }
               },

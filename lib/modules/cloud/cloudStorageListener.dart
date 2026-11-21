@@ -1,8 +1,8 @@
 import 'dart:collection';
 
-import 'package:mighty_plug_manager/modules/cloud/cloudManager.dart';
-import 'package:mighty_plug_manager/platform/presetStorageListener.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
+import 'package:almighty_amp/modules/cloud/cloudManager.dart';
+import 'package:almighty_amp/platform/presetStorageListener.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class CloudStorageListener implements PresetStorageListener {

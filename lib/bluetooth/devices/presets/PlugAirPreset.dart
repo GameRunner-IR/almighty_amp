@@ -3,9 +3,9 @@
 
 import 'dart:ui';
 
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightyPlugAir.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_air/Ampsv2.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/preset_constants.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugAir.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_air/Ampsv2.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/preset_constants.dart';
 
 import '../NuxDevice.dart';
 import '../effects/Processor.dart';

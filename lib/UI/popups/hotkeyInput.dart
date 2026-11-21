@@ -2,9 +2,9 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/midi/ControllerConstants.dart';
-import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
-import 'package:mighty_plug_manager/midi/controllers/MidiController.dart';
+import 'package:almighty_amp/midi/ControllerConstants.dart';
+import 'package:almighty_amp/midi/MidiControllerManager.dart';
+import 'package:almighty_amp/midi/controllers/MidiController.dart';
 
 class HotkeyInputDialog {
   late BuildContext _context;

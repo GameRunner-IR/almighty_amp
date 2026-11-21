@@ -5,8 +5,8 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/alertDialogs.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/Processor.dart';
+import 'package:almighty_amp/UI/popups/alertDialogs.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/Processor.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 
 class VerticalThickSlider extends StatefulWidget {

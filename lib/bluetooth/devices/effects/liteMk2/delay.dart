@@ -1,4 +1,4 @@
-import 'package:mighty_plug_manager/bluetooth/devices/value_formatters/ValueFormatter.dart';
+import 'package:almighty_amp/bluetooth/devices/value_formatters/ValueFormatter.dart';
 
 import '../../NuxConstants.dart';
 import '../MidiControllerHandles.dart';

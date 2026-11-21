@@ -1,4 +1,4 @@
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_pro/Reverb.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_pro/Reverb.dart';
 
 import '../../NuxConstants.dart';
 import '../../value_formatters/ValueFormatter.dart';

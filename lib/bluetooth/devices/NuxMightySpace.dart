@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/communication/plugProCommunication.dart';
+import 'package:almighty_amp/bluetooth/devices/communication/plugProCommunication.dart';
 
 import '../../UI/pages/device_specific_settings/PlugProSettings.dart';
 import 'NuxMightyPlugPro.dart';

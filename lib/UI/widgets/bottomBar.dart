@@ -2,7 +2,7 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/mightierIcons.dart';
+import 'package:almighty_amp/UI/mightierIcons.dart';
 
 class BottomBar extends StatefulWidget {
   final void Function(int) onTap;

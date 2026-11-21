@@ -2,7 +2,7 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/Processor.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/Processor.dart';
 
 import '../../bluetooth/devices/effects/MidiControllerHandles.dart';
 

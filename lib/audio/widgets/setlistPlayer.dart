@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:marquee_text/marquee_text.dart';
-import 'package:mighty_plug_manager/UI/widgets/thickSlider.dart';
+import 'package:almighty_amp/UI/widgets/thickSlider.dart';
 import '../../UI/mightierIcons.dart';
 import '../../UI/widgets/VolumeDrawer.dart';
 import '../../bluetooth/NuxDeviceControl.dart';

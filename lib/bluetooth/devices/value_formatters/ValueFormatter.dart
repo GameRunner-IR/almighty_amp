@@ -1,5 +1,5 @@
-import 'package:mighty_plug_manager/bluetooth/devices/value_formatters/FrequencyFormatter.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/value_formatters/SwitchFormatters.dart';
+import 'package:almighty_amp/bluetooth/devices/value_formatters/FrequencyFormatter.dart';
+import 'package:almighty_amp/bluetooth/devices/value_formatters/SwitchFormatters.dart';
 
 import 'TempoFormatter.dart';
 import 'DecibelFormatter.dart';

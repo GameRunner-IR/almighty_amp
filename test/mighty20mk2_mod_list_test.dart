@@ -2,8 +2,8 @@
 // This must not affect other devices (they keep PlugProPreset's modulation list).
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_pro/Modulation.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/Mighty20Mk2Preset.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_pro/Modulation.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/Mighty20Mk2Preset.dart';
 
 void main() {
   test('MKII modulation list has the correct models in order', () {

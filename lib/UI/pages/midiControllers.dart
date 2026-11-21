@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/hotkeysMainPage.dart';
-import 'package:mighty_plug_manager/UI/theme.dart';
-import 'package:mighty_plug_manager/UI/widgets/MidiDeviceTile.dart';
-import 'package:mighty_plug_manager/bluetooth/bleMidiHandler.dart';
-import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
-import 'package:mighty_plug_manager/midi/controllers/MidiController.dart';
+import 'package:almighty_amp/UI/pages/hotkeysMainPage.dart';
+import 'package:almighty_amp/UI/theme.dart';
+import 'package:almighty_amp/UI/widgets/MidiDeviceTile.dart';
+import 'package:almighty_amp/bluetooth/bleMidiHandler.dart';
+import 'package:almighty_amp/midi/MidiControllerManager.dart';
+import 'package:almighty_amp/midi/controllers/MidiController.dart';
 
 import '../../bluetooth/ble_controllers/BLEController.dart';
 

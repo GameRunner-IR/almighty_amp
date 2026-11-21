@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/value_formatters/ValueFormatter.dart';
+import 'package:almighty_amp/bluetooth/devices/value_formatters/ValueFormatter.dart';
 
 import '../../bluetooth/NuxDeviceControl.dart';
 import '../../platform/simpleSharedPrefs.dart';

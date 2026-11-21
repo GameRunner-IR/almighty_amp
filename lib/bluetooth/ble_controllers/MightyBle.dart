@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:mighty_plug_manager/utilities/list_extenstions.dart';
+import 'package:almighty_amp/utilities/list_extenstions.dart';
 
 import 'BLEController.dart';
 import 'package:mighty_ble/mighty_ble.dart';

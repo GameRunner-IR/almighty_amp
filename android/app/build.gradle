@@ -28,7 +28,8 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.exists()) {
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
@@ -44,7 +45,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.tuntori.mightieramp"
+        applicationId "ir.gamerunner.almightyamp"
         minSdkVersion 19
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
@@ -52,11 +53,13 @@ android {
         multiDexEnabled true
     }
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+        if (hasReleaseKeystore) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            }
         }
     }
     buildTypes {
@@ -70,7 +73,11 @@ android {
             applicationIdSuffix ".debug"
         }
         release {
-            signingConfig signingConfigs.release
+            if (hasReleaseKeystore) {
+                signingConfig signingConfigs.release
+            } else {
+                logger.warn("android/key.properties not found; release APK will be unsigned.")
+            }
             minifyEnabled true
             shrinkResources true
             ndk {

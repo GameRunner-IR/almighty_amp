@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/midi/ControllerConstants.dart';
+import 'package:almighty_amp/midi/ControllerConstants.dart';
 
 import 'ControllerHotkey.dart';
 

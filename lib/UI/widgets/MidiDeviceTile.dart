@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/midi/controllers/MidiController.dart';
+import 'package:almighty_amp/midi/controllers/MidiController.dart';
 
 class MidiControllerTile extends StatelessWidget {
   final MidiController controller;

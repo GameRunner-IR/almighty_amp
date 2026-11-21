@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/alertDialogs.dart';
-import 'package:mighty_plug_manager/UI/theme.dart';
-import 'package:mighty_plug_manager/audio/trackdata/trackData.dart';
+import 'package:almighty_amp/UI/popups/alertDialogs.dart';
+import 'package:almighty_amp/UI/theme.dart';
+import 'package:almighty_amp/audio/trackdata/trackData.dart';
 
 import 'models/setlist.dart';
 

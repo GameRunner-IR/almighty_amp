@@ -5,9 +5,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/bluetooth/bleMidiHandler.dart';
-import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/bleMidiHandler.dart';
+import 'package:almighty_amp/midi/MidiControllerManager.dart';
 
 import '../../bluetooth/ble_controllers/BLEController.dart';
 import '../../bluetooth/devices/features/tuner.dart';
@@ -231,9 +231,9 @@ class AppBarTitle extends StatelessWidget {
     return ValueListenableBuilder(
       builder: (BuildContext context, value, Widget? child) {
         if (value is String && value.trim() != "") {
-          return Text("$value - Mightier Amp");
+          return Text("$value - Almighty Amp");
         }
-        return const Text("Mightier Amp");
+        return const Text("Almighty Amp");
       },
       valueListenable: NuxDeviceControl.instance().presetNameNotifier,
     );

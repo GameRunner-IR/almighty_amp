@@ -2,9 +2,9 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/audio/models/jamTrack.dart';
-import 'package:mighty_plug_manager/audio/trackdata/trackData.dart';
-import 'package:mighty_plug_manager/audio/tracksPage.dart';
+import 'package:almighty_amp/audio/models/jamTrack.dart';
+import 'package:almighty_amp/audio/trackdata/trackData.dart';
+import 'package:almighty_amp/audio/tracksPage.dart';
 
 class SelectTrackDialog {
   bool _multiselect = false;

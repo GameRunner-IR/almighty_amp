@@ -5,8 +5,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/nestedWillPopScope.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/UI/widgets/common/nestedWillPopScope.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 import '../../bluetooth/NuxDeviceControl.dart';
 import '../../bluetooth/devices/presets/preset_constants.dart';
 

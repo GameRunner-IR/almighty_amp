@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/pages/device_specific_settings/eq/MightySpaceSpeakerEQ.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightyPlugPro.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMightySpace.dart';
+import 'package:almighty_amp/UI/pages/device_specific_settings/eq/MightySpaceSpeakerEQ.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugPro.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMightySpace.dart';
 
 import '../../../bluetooth/bleMidiHandler.dart';
 import '../../../bluetooth/devices/NuxDevice.dart';

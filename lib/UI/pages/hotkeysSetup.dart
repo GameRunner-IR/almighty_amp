@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/hotkeyInput.dart';
-import 'package:mighty_plug_manager/UI/popups/midiControlInfo.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/MidiControllerHandles.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/Processor.dart';
-import 'package:mighty_plug_manager/midi/ControllerConstants.dart';
-import 'package:mighty_plug_manager/midi/MidiControllerManager.dart';
-import 'package:mighty_plug_manager/midi/controllers/MidiController.dart';
+import 'package:almighty_amp/UI/popups/hotkeyInput.dart';
+import 'package:almighty_amp/UI/popups/midiControlInfo.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/MidiControllerHandles.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/Processor.dart';
+import 'package:almighty_amp/midi/ControllerConstants.dart';
+import 'package:almighty_amp/midi/MidiControllerManager.dart';
+import 'package:almighty_amp/midi/controllers/MidiController.dart';
 
 class HotkeysSetup extends StatefulWidget {
   final MidiController controller;

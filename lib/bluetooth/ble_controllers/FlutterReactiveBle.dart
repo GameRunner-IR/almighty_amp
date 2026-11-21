@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:mighty_plug_manager/bluetooth/ble_controllers/BLEController.dart';
+import 'package:almighty_amp/bluetooth/ble_controllers/BLEController.dart';
 
 class FRBScanResult extends BLEScanResult {
   @override

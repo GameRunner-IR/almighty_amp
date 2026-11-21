@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/toneshare/cloud_login.dart';
-import 'package:mighty_plug_manager/UI/toneshare/cloud_signup.dart';
+import 'package:almighty_amp/UI/toneshare/cloud_login.dart';
+import 'package:almighty_amp/UI/toneshare/cloud_signup.dart';
 
 enum AuthPage { signIn, signUp }
 

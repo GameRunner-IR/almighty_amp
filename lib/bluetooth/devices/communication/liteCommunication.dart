@@ -1,4 +1,4 @@
-import 'package:mighty_plug_manager/bluetooth/devices/NuxDevice.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxDevice.dart';
 
 import '../NuxConstants.dart';
 import 'communication.dart';

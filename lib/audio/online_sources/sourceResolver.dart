@@ -1,6 +1,6 @@
 import 'package:audio_picker/audio_picker.dart';
-import 'package:mighty_plug_manager/audio/online_sources/YoutubeSource.dart';
-import 'package:mighty_plug_manager/platform/platformUtils.dart';
+import 'package:almighty_amp/audio/online_sources/YoutubeSource.dart';
+import 'package:almighty_amp/platform/platformUtils.dart';
 
 class SourceResolver {
   static final Map<String, String> _pathCache = {};

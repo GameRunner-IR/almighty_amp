@@ -2,9 +2,9 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/audio/models/trackAutomation.dart';
-import 'package:mighty_plug_manager/audio/models/waveform_data.dart';
-import 'package:mighty_plug_manager/audio/widgets/waveform_painter.dart';
+import 'package:almighty_amp/audio/models/trackAutomation.dart';
+import 'package:almighty_amp/audio/models/waveform_data.dart';
+import 'package:almighty_amp/audio/widgets/waveform_painter.dart';
 
 import '../automationController.dart';
 

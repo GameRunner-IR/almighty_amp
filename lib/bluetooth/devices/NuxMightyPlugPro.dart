@@ -4,7 +4,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/device_data/processors_list.dart';
+import 'package:almighty_amp/bluetooth/devices/device_data/processors_list.dart';
 import '../../UI/pages/device_specific_settings/PlugProSettings.dart';
 import 'NuxConstants.dart';
 import 'NuxFXID.dart';

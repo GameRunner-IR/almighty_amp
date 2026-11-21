@@ -11,8 +11,8 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:mighty_plug_manager/bluetooth/ble_controllers/BLEController.dart';
-import 'package:mighty_plug_manager/utilities/list_extenstions.dart';
+import 'package:almighty_amp/bluetooth/ble_controllers/BLEController.dart';
+import 'package:almighty_amp/utilities/list_extenstions.dart';
 
 class FBPScanResult extends BLEScanResult {
   @override

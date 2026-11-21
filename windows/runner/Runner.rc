@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.tuntori" "\0"
-            VALUE "FileDescription", "mighty_plug_manager" "\0"
+            VALUE "CompanyName", "GameRunner" "\0"
+            VALUE "FileDescription", "Almighty Amp" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mighty_plug_manager" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2022 com.tuntori. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mighty_plug_manager.exe" "\0"
-            VALUE "ProductName", "mighty_plug_manager" "\0"
+            VALUE "InternalName", "AlmightyAmp" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 GameRunner. All rights reserved." "\0"
+            VALUE "OriginalFilename", "AlmightyAmp.exe" "\0"
+            VALUE "ProductName", "GameRunner Almighty Amp" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

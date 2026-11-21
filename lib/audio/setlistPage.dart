@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/popups/alertDialogs.dart';
-import 'package:mighty_plug_manager/UI/popups/selectTrack.dart';
-import 'package:mighty_plug_manager/UI/theme.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/nestedWillPopScope.dart';
-import 'package:mighty_plug_manager/audio/setlist_player/setlistPlayerState.dart';
+import 'package:almighty_amp/UI/popups/alertDialogs.dart';
+import 'package:almighty_amp/UI/popups/selectTrack.dart';
+import 'package:almighty_amp/UI/theme.dart';
+import 'package:almighty_amp/UI/widgets/common/nestedWillPopScope.dart';
+import 'package:almighty_amp/audio/setlist_player/setlistPlayerState.dart';
 import '../UI/pages/jamTracks.dart';
 import 'models/setlist.dart';
 import 'trackdata/trackData.dart';

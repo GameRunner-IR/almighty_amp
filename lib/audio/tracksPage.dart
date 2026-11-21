@@ -2,13 +2,14 @@ import 'package:audio_picker/audio_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:mighty_plug_manager/UI/popups/alertDialogs.dart';
-import 'package:mighty_plug_manager/UI/theme.dart';
-import 'package:mighty_plug_manager/UI/widgets/fabMenu.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/nestedWillPopScope.dart';
-import 'package:mighty_plug_manager/UI/widgets/common/searchTextField.dart';
-import 'package:mighty_plug_manager/audio/setlist_player/setlistPlayerState.dart';
-import 'package:mighty_plug_manager/audio/widgets/media_library/media_browse.dart';
+import 'package:file_selector/file_selector.dart' as fs;
+import 'package:almighty_amp/UI/popups/alertDialogs.dart';
+import 'package:almighty_amp/UI/theme.dart';
+import 'package:almighty_amp/UI/widgets/fabMenu.dart';
+import 'package:almighty_amp/UI/widgets/common/nestedWillPopScope.dart';
+import 'package:almighty_amp/UI/widgets/common/searchTextField.dart';
+import 'package:almighty_amp/audio/setlist_player/setlistPlayerState.dart';
+import 'package:almighty_amp/audio/widgets/media_library/media_browse.dart';
 import 'package:path/path.dart';
 import '../platform/platformUtils.dart';
 import '../platform/simpleSharedPrefs.dart';
@@ -290,6 +291,22 @@ class _TracksPageState extends State<TracksPage>
 
   void addFromFile() async {
     //add track mode
+    if (PlatformUtils.isWindows) {
+      final typeGroup = fs.XTypeGroup(label: 'audio', extensions: const [
+        'mp3',
+        'wav',
+        'flac',
+        'm4a',
+        'aac',
+        'ogg',
+        'wma'
+      ]);
+      final files = await fs.openFiles(acceptedTypeGroups: [typeGroup]);
+      if (files.isNotEmpty) {
+        await _processMediaList(files.map((f) => f.path).toList());
+      }
+      return;
+    }
     var path = await AudioPicker().pickAudioMultiple();
     await _processMediaList(path);
   }
@@ -336,9 +353,11 @@ class _TracksPageState extends State<TracksPage>
       title = libSong.title;
       url = libSong.uri ?? "";
     } else {
-      var meta = await AudioPicker().getMetadata(path);
-      artist = meta["artist"]?.trim() ?? "";
-      title = meta["title"]?.trim() ?? "";
+      if (PlatformUtils.isAndroid || PlatformUtils.isIOS) {
+        var meta = await AudioPicker().getMetadata(path);
+        artist = meta["artist"]?.trim() ?? "";
+        title = meta["title"]?.trim() ?? "";
+      }
       url = path;
     }
 
@@ -544,31 +563,32 @@ class _TracksPageState extends State<TracksPage>
             addFromOnlineSource(context);
           },
         ),
-      Bubble(
-        title: "Media Library",
-        iconColor: Colors.white,
-        bubbleColor: Colors.blue,
-        icon: Icons.library_music,
-        titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
-        onPress: () {
-          _animationController.reverse();
-          if (PlatformUtils.isIOS) {
-            addFromFile();
-          } else {
-            addFromMediaLibrary(context);
-          }
-        },
-      ),
+      if (PlatformUtils.isAndroid || PlatformUtils.isIOS)
+        Bubble(
+          title: "Media Library",
+          iconColor: Colors.white,
+          bubbleColor: Colors.blue,
+          icon: Icons.library_music,
+          titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+          onPress: () {
+            _animationController.reverse();
+            if (PlatformUtils.isIOS) {
+              addFromFile();
+            } else {
+              addFromMediaLibrary(context);
+            }
+          },
+        ),
       //Floating action menu item
       Bubble(
-        title: "File Browser",
+        title: PlatformUtils.isWindows ? "Add Files" : "File Browser",
         iconColor: Colors.white,
         bubbleColor: Colors.blue,
         icon: Icons.folder,
         titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
         onPress: () {
           _animationController.reverse();
-          if (PlatformUtils.isAndroid) {
+          if (PlatformUtils.isAndroid || PlatformUtils.isWindows) {
             addFromFile();
           } else if (PlatformUtils.isIOS) {
             addFromIosFile();

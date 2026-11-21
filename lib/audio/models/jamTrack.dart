@@ -1,4 +1,4 @@
-import 'package:mighty_plug_manager/audio/models/trackAutomation.dart';
+import 'package:almighty_amp/audio/models/trackAutomation.dart';
 
 class JamTrack {
   final TrackAutomation _automation = TrackAutomation();

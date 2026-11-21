@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mighty_plug_manager/UI/pages/drumsPage.dart';
-import 'package:mighty_plug_manager/UI/utils.dart';
-import 'package:mighty_plug_manager/UI/widgets/NuxAppBar.dart';
+import 'package:almighty_amp/UI/pages/drumsPage.dart';
+import 'package:almighty_amp/UI/utils.dart';
+import 'package:almighty_amp/UI/widgets/NuxAppBar.dart';
 
 import '../bluetooth/NuxDeviceControl.dart';
 import '../bluetooth/bleMidiHandler.dart';
@@ -114,7 +114,7 @@ class MainTabsState extends State<MainTabs> with TickerProviderStateMixin {
           AlertDialogs.showInfoDialog(context,
               title: "Bluetooth permissions required!",
               description:
-                  "Please, grant bluetooth scan and connect permissions. They are required for Mightier Amp to work.",
+                  "Please, grant bluetooth scan and connect permissions. They are required for Almighty Amp to work.",
               confirmButton: "OK");
           break;
       }
@@ -215,7 +215,7 @@ class MainTabsState extends State<MainTabs> with TickerProviderStateMixin {
   Future<bool> _willPopCallback() async {
     Completer<bool> confirmation = Completer<bool>();
     AlertDialogs.showConfirmDialog(context,
-        title: "Exit Mightier Amp?",
+        title: "Exit Almighty Amp?",
         cancelButton: "No",
         confirmButton: "Yes",
         confirmColor: Colors.red,

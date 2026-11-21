@@ -1,7 +1,7 @@
 // (c) 2020-2021 Dian Iliev (Tuntorius)
 // This code is licensed under MIT license (see LICENSE.md for details)
 
-import 'package:mighty_plug_manager/bluetooth/devices/device_data/processors_list.dart';
+import 'package:almighty_amp/bluetooth/devices/device_data/processors_list.dart';
 import 'NuxConstants.dart';
 import 'communication/communication.dart';
 import 'communication/liteCommunication.dart';

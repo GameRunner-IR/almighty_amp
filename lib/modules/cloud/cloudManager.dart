@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:mighty_plug_manager/modules/cloud/cloudStorageListener.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
+import 'package:almighty_amp/modules/cloud/cloudStorageListener.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 import 'customAuthStore.dart';

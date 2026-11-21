@@ -2,8 +2,8 @@ import 'package:drag_and_drop_lists/drag_and_drop_list_interface.dart';
 import 'package:drag_and_drop_lists/drag_and_drop_lists.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/widgets/presets/preset_list/preset_widget.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/UI/widgets/presets/preset_list/preset_widget.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 import '../../../mainTabs.dart';
 import '/utilities/string_extensions.dart';
 

@@ -5,8 +5,8 @@ import 'dart:core';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/widgets/presets/EffectChainBar.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/UI/widgets/presets/EffectChainBar.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 import 'package:undo/undo.dart';
 import '../../../bluetooth/NuxDeviceControl.dart';
 import '../../../bluetooth/devices/NuxDevice.dart';

@@ -2,8 +2,8 @@
 // NUX Mighty 20 MKII.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/effects/plug_pro/Amps.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/presets/Mighty20Mk2Preset.dart';
+import 'package:almighty_amp/bluetooth/devices/effects/plug_pro/Amps.dart';
+import 'package:almighty_amp/bluetooth/devices/presets/Mighty20Mk2Preset.dart';
 
 void main() {
   test('Plug Pro only amps are unavailable on the MKII', () {

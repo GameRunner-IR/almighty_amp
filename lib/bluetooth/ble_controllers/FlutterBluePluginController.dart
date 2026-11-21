@@ -12,7 +12,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_blue_plugin/flutter_blue_plugin.dart';
-import 'package:mighty_plug_manager/bluetooth/ble_controllers/BLEController.dart';
+import 'package:almighty_amp/bluetooth/ble_controllers/BLEController.dart';
 
 class FBPScanResult extends BLEScanResult {
   @override

@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxDevice.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxDevice.dart';
 
 import '../../../bluetooth/devices/presets/Mighty20Mk2Preset.dart';
 import '../../../bluetooth/devices/presets/Preset.dart';

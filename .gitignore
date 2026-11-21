@@ -19,6 +19,9 @@ just_audio/
 
 #ignore sign key
 /android/key.properties
+/android/**/*.jks
+/android/**/*.keystore
+/android/**/*.p12
 
 #ignore api keys and similar
 /lib/configKeys.dart

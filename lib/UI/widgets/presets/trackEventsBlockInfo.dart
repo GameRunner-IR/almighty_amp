@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/audio/setlist_player/setlistPlayerState.dart';
+import 'package:almighty_amp/audio/setlist_player/setlistPlayerState.dart';
 
 class TrackEventsBlockInfo extends StatelessWidget {
   final Widget child;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/modules/cloud/cloudManager.dart';
+import 'package:almighty_amp/modules/cloud/cloudManager.dart';
 
 import '../widgets/common/searchTextField.dart';
 

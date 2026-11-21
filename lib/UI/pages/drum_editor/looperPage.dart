@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/UI/widgets/thickSlider.dart';
+import 'package:almighty_amp/UI/widgets/thickSlider.dart';
 
 import '../../../bluetooth/NuxDeviceControl.dart';
 import '../../../bluetooth/devices/features/looper.dart';

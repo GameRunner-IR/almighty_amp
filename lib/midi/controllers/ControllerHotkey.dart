@@ -1,7 +1,7 @@
-import 'package:mighty_plug_manager/audio/setlist_player/setlistPlayerState.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
-import 'package:mighty_plug_manager/utilities/DelayTapTimer.dart';
+import 'package:almighty_amp/audio/setlist_player/setlistPlayerState.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
+import 'package:almighty_amp/utilities/DelayTapTimer.dart';
 import '../../bluetooth/devices/NuxDevice.dart';
 import '../../bluetooth/devices/effects/MidiControllerHandles.dart';
 import '../../bluetooth/devices/effects/Processor.dart';

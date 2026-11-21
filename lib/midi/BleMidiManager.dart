@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:mighty_plug_manager/bluetooth/bleMidiHandler.dart';
+import 'package:almighty_amp/bluetooth/bleMidiHandler.dart';
 
 import '../bluetooth/ble_controllers/BLEController.dart';
 import 'ControllerConstants.dart';

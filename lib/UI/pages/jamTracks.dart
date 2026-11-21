@@ -4,11 +4,11 @@
 //import 'package:audio_picker/audio_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:mighty_plug_manager/audio/setlistPage.dart';
-import 'package:mighty_plug_manager/audio/setlistsPage.dart';
-import 'package:mighty_plug_manager/audio/trackdata/trackData.dart';
-import 'package:mighty_plug_manager/audio/tracksPage.dart';
-import 'package:mighty_plug_manager/platform/presetsStorage.dart';
+import 'package:almighty_amp/audio/setlistPage.dart';
+import 'package:almighty_amp/audio/setlistsPage.dart';
+import 'package:almighty_amp/audio/trackdata/trackData.dart';
+import 'package:almighty_amp/audio/tracksPage.dart';
+import 'package:almighty_amp/platform/presetsStorage.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../audio/models/setlist.dart';
@@ -192,6 +192,9 @@ class _JamTracksState extends State<JamTracks>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (!(PlatformUtils.isAndroid || PlatformUtils.isIOS)) {
+      return SafeArea(child: _jamtracksWidget());
+    }
     return SafeArea(
       child: FutureBuilder<PermissionStatus>(
         future: _mediaPermission?.status,

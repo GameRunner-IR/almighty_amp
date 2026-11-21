@@ -4,9 +4,9 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:mighty_plug_manager/audio/models/trackAutomation.dart';
-import 'package:mighty_plug_manager/bluetooth/NuxDeviceControl.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/audio/models/trackAutomation.dart';
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
 import 'models/jamTrack.dart';
 import 'online_sources/sourceResolver.dart';
 import '../platform/platformUtils.dart';
@@ -117,7 +117,10 @@ class AutomationController {
   Future setAudioFile(String path, int positionEventSkips) async {
     _sourceUrl = path;
     _resolvedUrl = await SourceResolver.getSourceUrl(_sourceUrl);
-    var source = ProgressiveAudioSource(Uri.parse(_resolvedUrl));
+    final uri = _resolvedUrl.contains("://")
+        ? Uri.parse(_resolvedUrl)
+        : Uri.file(_resolvedUrl);
+    var source = ProgressiveAudioSource(uri);
     await player.setAudioSource(source);
 
     if (NuxDeviceControl.instance().isConnected) {

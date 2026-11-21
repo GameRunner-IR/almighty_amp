@@ -1,6 +1,6 @@
-import 'package:mighty_plug_manager/audio/online_sources/onlineSource.dart';
-import 'package:mighty_plug_manager/audio/online_sources/onlineTrack.dart';
-import 'package:mighty_plug_manager/audio/online_sources/sourceResolver.dart';
+import 'package:almighty_amp/audio/online_sources/onlineSource.dart';
+import 'package:almighty_amp/audio/online_sources/onlineTrack.dart';
+import 'package:almighty_amp/audio/online_sources/sourceResolver.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeSource extends OnlineSource {

@@ -4,9 +4,9 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:mighty_plug_manager/bluetooth/devices/NuxMighty8BT.dart';
-import 'package:mighty_plug_manager/platform/simpleSharedPrefs.dart';
-import 'package:mighty_plug_manager/utilities/list_extenstions.dart';
+import 'package:almighty_amp/bluetooth/devices/NuxMighty8BT.dart';
+import 'package:almighty_amp/platform/simpleSharedPrefs.dart';
+import 'package:almighty_amp/utilities/list_extenstions.dart';
 import 'package:undo/undo.dart';
 
 import 'bleMidiHandler.dart';

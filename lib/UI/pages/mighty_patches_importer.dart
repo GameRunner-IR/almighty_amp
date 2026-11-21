@@ -182,12 +182,27 @@ class _MightyPatchesPageState extends State<MightyPatchesPage> {
     if (qrData != null) {
       var device = NuxDeviceControl.instance().device;
 
-      var preset = device.setupDetachedPresetFromQRData(qrData);
+      var result = device.selectedPatch.setupPresetFromQRData(qrData);
+      if (result != PresetQRError.Ok) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              QrUtils.QRMessages[result.index],
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 20),
+            )));
+        return;
+      }
+
+      var preset = device.getCustomPreset(device.selectedNuxIndex);
+      preset.setupPresetFromQRData(qrData);
       var saveDialog = SavePresetDialog(
           customName: imageName,
           customPreset: preset,
           device: device,
           confirmColor: Theme.of(context).hintColor);
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (BuildContext context) =>

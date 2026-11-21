@@ -90,6 +90,8 @@ class QRExportDialog {
                         } else if (PlatformUtils.isIOS) {
                           storageDirectory =
                               await getApplicationDocumentsDirectory();
+                        } else if (PlatformUtils.isWindows) {
+                          storageDirectory = await getTemporaryDirectory();
                         }
                         var tracksPath =
                             path.join(storageDirectory?.path ?? "", "");
@@ -99,7 +101,7 @@ class QRExportDialog {
                         await screenshotController.captureAndSave(tracksPath,
                             fileName: "preset.png");
 
-                        Share.shareFiles(['$tracksPath/preset.png'],
+                        Share.shareXFiles([XFile('$tracksPath/preset.png')],
                             text: 'QR Code',
                             sharePositionOrigin: Rect.fromCenter(
                                 center: const Offset(100, 100),

@@ -85,6 +85,8 @@ dependencies:
   pocketbase: ^0.16.0
   bluetooth_low_energy_platform_interface: ^6.0.0
   bluetooth_low_energy_windows: 6.0.0
+  qr: ^3.0.1
+  zxing2: ^0.2.4
 
   #webview_flutter: ^4.4.2
   #http: ^1.1.0

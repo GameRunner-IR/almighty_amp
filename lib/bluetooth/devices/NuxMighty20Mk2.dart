@@ -87,6 +87,8 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
   @override
   String get productIconLabel => "20 MKII";
   @override
+  String get productNameForQR => "Mighty 20 MKII";
+  @override
   List<String> get productBLENames => ["NUX NGA-20"];
 
   @override
@@ -94,6 +96,17 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
 
   @override
   bool get hackableIRs => false;
+
+  @override
+  int get deviceQRId => 20;
+
+  @override
+  int get deviceQRVersion => 1;
+
+  @override
+  bool checkQRValid(int deviceId, int ver) {
+    return deviceId == deviceQRId && ver == deviceQRVersion;
+  }
 
   @override
   int get cabinetSlotIndex => 0;

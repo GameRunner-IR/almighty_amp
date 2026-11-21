@@ -2,6 +2,7 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 //
 
+import 'package:file_selector/file_selector.dart' as fs;
 import 'package:flutter/material.dart';
 import 'package:almighty_amp/UI/popups/alertDialogs.dart';
 import 'package:almighty_amp/UI/popups/exportQRCode.dart';
@@ -28,21 +29,24 @@ class _ChannelSelectorState extends State<ChannelSelector> {
   late List<Preset> _presets;
   EditorLayoutMode layout = EditorLayoutMode.expand;
 
-  var qrMenu = <PopupMenuEntry>[
-    PopupMenuItem(
-      value: 1,
-      child: Row(
-        children: <Widget>[
-          Icon(
-            Icons.qr_code_scanner,
-            color: AppThemeConfig.contextMenuIconColor,
-          ),
-          const SizedBox(width: 5),
-          const Text("Scan QR"),
-        ],
-      ),
-    ),
-    PopupMenuItem(
+  List<PopupMenuEntry> get qrMenu {
+    final items = <PopupMenuEntry>[];
+    if (!PlatformUtils.isWindows) {
+      items.add(PopupMenuItem(
+        value: 1,
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.qr_code_scanner,
+              color: AppThemeConfig.contextMenuIconColor,
+            ),
+            const SizedBox(width: 5),
+            const Text("Scan QR"),
+          ],
+        ),
+      ));
+    }
+    items.add(PopupMenuItem(
       value: 2,
       child: Row(
         children: <Widget>[
@@ -54,8 +58,8 @@ class _ChannelSelectorState extends State<ChannelSelector> {
           const Text("Import QR Image"),
         ],
       ),
-    ),
-    PopupMenuItem(
+    ));
+    items.add(PopupMenuItem(
       value: 3,
       child: Row(
         children: <Widget>[
@@ -67,8 +71,9 @@ class _ChannelSelectorState extends State<ChannelSelector> {
           const Text("Share QR"),
         ],
       ),
-    ),
-  ];
+    ));
+    return items;
+  }
 
   @override
   void initState() {
@@ -264,6 +269,21 @@ class _ChannelSelectorState extends State<ChannelSelector> {
         } else if (PlatformUtils.isIOS) {
           final content = await QrUtils.scanImage();
           if (content != null) {
+            setupFromQRData(content);
+            setState(() {});
+          } else {
+            showQRError();
+          }
+        } else {
+          final picker = await fs.openFiles(acceptedTypeGroups: [
+            const fs.XTypeGroup(label: 'images', extensions: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'])
+          ]);
+          if (picker.isEmpty) return;
+          final bytes = await picker.first.readAsBytes();
+          debugPrint('[QR-UI] picked file ${picker.first.name}, bytes=${bytes.length}');
+          final content = await QrUtils.scanImageFromData(bytes);
+          debugPrint('[QR-UI] scan result: ${content == null ? "null" : (content.isEmpty ? "empty" : "ok len=${content.length}")}');
+          if (content != null && content.isNotEmpty) {
             setupFromQRData(content);
             setState(() {});
           } else {

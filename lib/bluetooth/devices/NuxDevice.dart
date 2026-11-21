@@ -487,7 +487,7 @@ abstract class NuxDevice extends ChangeNotifier {
   Preset? setupDetachedPresetFromQRData(String qrData) {
     var p = getCustomPreset(selectedNuxIndex);
 
-    var result = p.setupPresetFromQRData(qrData);
+    var result = p.setupPresetFromQRData(qrData, sendToDevice: false);
     if (result == PresetQRError.Ok) return p;
     return null;
   }

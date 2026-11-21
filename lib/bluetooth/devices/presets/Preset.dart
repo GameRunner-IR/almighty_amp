@@ -182,13 +182,14 @@ abstract class Preset {
     setupPresetFromNuxDataArray(nuxData);
   }
 
-  PresetQRError setupPresetFromQRData(String qrData) {
+  PresetQRError setupPresetFromQRData(String qrData,
+      {bool sendToDevice = true}) {
     if (qrData.contains(QrUtils.nuxQRPrefix)) {
       var b64Data = qrData.substring(QrUtils.nuxQRPrefix.length);
       var data = base64Decode(b64Data);
       if (device.checkQRValid(data[0], data[1])) {
         setupPresetFromNuxDataArray(data.sublist(2));
-        device.deviceControl.sendFullPresetSettings();
+        if (sendToDevice) device.deviceControl.sendFullPresetSettings();
         return PresetQRError.Ok;
       }
       if (data[0] != device.deviceQRId) return PresetQRError.WrongDevice;

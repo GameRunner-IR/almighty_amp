@@ -30,31 +30,39 @@ class EffectChainBar extends StatelessWidget {
       required this.reorderable})
       : super(key: key);
 
+  List<int> get _visibleSlotIndices {
+    final indices = preset is Mighty20Mk2Preset
+        ? (preset as Mighty20Mk2Preset).visibleSlotIndices
+        : List<int>.generate(device.effectsChainLength, (i) => i);
+    // Some devices/firmware may report slots (e.g. WAH/SR) that are not
+    // represented in the UI processor list; skip them to avoid null crashes.
+    return indices
+        .where((i) => device.getProcessorInfoByFXID(preset.getFXIDFromSlot(i)) != null)
+        .toList();
+  }
+
   EffectChainButton buildItem(context, index) {
-    if (preset is Mighty20Mk2Preset) {
-      index = (preset as Mighty20Mk2Preset).visibleSlotIndices[index];
-    }
-    var proc = preset.getFXIDFromSlot(index);
-    var effect = device.getProcessorInfoByFXID(proc);
-    bool selected = index == device.selectedSlot;
+    final slotIndex = _visibleSlotIndices[index];
+    var proc = preset.getFXIDFromSlot(slotIndex);
+    var effect = device.getProcessorInfoByFXID(proc)!;
+    bool selected = slotIndex == device.selectedSlot;
 
     return EffectChainButton(
-        index: index,
-        effectInfo: effect!,
-        color: preset.effectColor(index),
-        enabled: preset.slotEnabled(index),
+        index: slotIndex,
+        effectInfo: effect,
+        color: preset.effectColor(slotIndex),
+        enabled: preset.slotEnabled(slotIndex),
         selected: selected,
         reorderable: reorderable,
-        key: Key(index.toString()),
-        onTap: () => onTap(index),
-        onDoubleTap: () => onDoubleTap(index));
+        key: Key(slotIndex.toString()),
+        onTap: () => onTap(slotIndex),
+        onDoubleTap: () => onDoubleTap(slotIndex));
   }
 
   @override
   Widget build(BuildContext context) {
-    final visibleSlotCount = preset is Mighty20Mk2Preset
-        ? (preset as Mighty20Mk2Preset).visibleSlotIndices.length
-        : device.effectsChainLength;
+    final visibleSlotIndices = _visibleSlotIndices;
+    final visibleSlotCount = visibleSlotIndices.length;
 
     double constrainHeight = max(
         min(
@@ -92,12 +100,8 @@ class EffectChainBar extends StatelessWidget {
         itemBuilder: buildItem,
         onReorder: (a, b) {
           if (b > a) b--;
-          if (preset is Mighty20Mk2Preset) {
-            final slots = (preset as Mighty20Mk2Preset).visibleSlotIndices;
-            a = slots[a];
-            b = slots[b];
-          }
-          onReorder(a, b);
+          final slots = visibleSlotIndices;
+          onReorder(slots[a], slots[b]);
         },
       );
     } else {

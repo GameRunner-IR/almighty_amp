@@ -8,7 +8,16 @@ import 'platformUtils.dart';
 
 Future<String> saveFileString(String mime, String name, String data) async {
   if (PlatformUtils.isWindows) {
-    final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    var ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    if (ext.isEmpty) {
+      const mimeExt = {
+        'image/png': 'png',
+        'image/jpeg': 'jpg',
+        'application/json': 'json',
+        'text/plain': 'txt',
+      };
+      ext = mimeExt[mime.toLowerCase()] ?? '';
+    }
     final suggested = ext.isNotEmpty && !name.toLowerCase().endsWith('.$ext')
         ? '$name.$ext'
         : name;
@@ -16,7 +25,7 @@ Future<String> saveFileString(String mime, String name, String data) async {
       suggestedName: suggested,
       acceptedTypeGroups: ext.isEmpty
           ? const <fs.XTypeGroup>[]
-          : [fs.XTypeGroup(label: '${ext.toUpperCase()} file', extensions: [ext])],
+          : [fs.XTypeGroup(label: '${ext.toUpperCase()} Image', extensions: [ext])],
     );
     if (location == null) return "";
     var savePath = location.path;
@@ -45,7 +54,16 @@ Future<String> saveFileString(String mime, String name, String data) async {
 
 Future<String> saveFile(String mime, String name, List<int> data) async {
   if (PlatformUtils.isWindows) {
-    final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    var ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    if (ext.isEmpty) {
+      const mimeExt = {
+        'image/png': 'png',
+        'image/jpeg': 'jpg',
+        'application/json': 'json',
+        'text/plain': 'txt',
+      };
+      ext = mimeExt[mime.toLowerCase()] ?? '';
+    }
     final suggested = ext.isNotEmpty && !name.toLowerCase().endsWith('.$ext')
         ? '$name.$ext'
         : name;
@@ -53,7 +71,7 @@ Future<String> saveFile(String mime, String name, List<int> data) async {
       suggestedName: suggested,
       acceptedTypeGroups: ext.isEmpty
           ? const <fs.XTypeGroup>[]
-          : [fs.XTypeGroup(label: '${ext.toUpperCase()} file', extensions: [ext])],
+          : [fs.XTypeGroup(label: '${ext.toUpperCase()} Image', extensions: [ext])],
     );
     if (location == null) return "";
     var savePath = location.path;

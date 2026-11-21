@@ -98,7 +98,7 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
   bool get hackableIRs => false;
 
   @override
-  int get deviceQRId => 20;
+  int get deviceQRId => 21;
 
   @override
   int get deviceQRVersion => 1;

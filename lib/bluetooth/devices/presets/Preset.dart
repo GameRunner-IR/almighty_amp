@@ -12,6 +12,7 @@ import '../NuxDevice.dart';
 import '../NuxFXID.dart';
 import '../effects/Processor.dart';
 import 'preset_constants.dart';
+import 'qr_import_report.dart';
 
 abstract class Preset {
   int get qrDataLength;
@@ -184,18 +185,25 @@ abstract class Preset {
 
   PresetQRError setupPresetFromQRData(String qrData,
       {bool sendToDevice = true}) {
+    return setupPresetFromQRDataReport(qrData, sendToDevice: sendToDevice).error;
+  }
+
+  QrImportReport setupPresetFromQRDataReport(String qrData,
+      {bool sendToDevice = true}) {
     if (qrData.contains(QrUtils.nuxQRPrefix)) {
       var b64Data = qrData.substring(QrUtils.nuxQRPrefix.length);
       var data = base64Decode(b64Data);
       if (device.checkQRValid(data[0], data[1])) {
         setupPresetFromNuxDataArray(data.sublist(2));
         if (sendToDevice) device.deviceControl.sendFullPresetSettings();
-        return PresetQRError.Ok;
+        return QrImportReport.ok;
       }
-      if (data[0] != device.deviceQRId) return PresetQRError.WrongDevice;
-      return PresetQRError.WrongFWVersion;
+      if (data[0] != device.deviceQRId) {
+        return const QrImportReport(PresetQRError.WrongDevice);
+      }
+      return const QrImportReport(PresetQRError.WrongFWVersion);
     }
-    return PresetQRError.UnsupportedFormat;
+    return const QrImportReport(PresetQRError.UnsupportedFormat);
   }
 
   String getAmpNameByNuxIndex(int index, int version) {

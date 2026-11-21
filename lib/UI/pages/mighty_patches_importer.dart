@@ -182,21 +182,55 @@ class _MightyPatchesPageState extends State<MightyPatchesPage> {
     if (qrData != null) {
       var device = NuxDeviceControl.instance().device;
 
-      var result = device.selectedPatch.setupPresetFromQRData(qrData);
-      if (result != PresetQRError.Ok) {
+      var preset = device.getCustomPreset(device.selectedNuxIndex);
+      final report = preset.setupPresetFromQRDataReport(qrData, sendToDevice: false);
+      if (report.error != PresetQRError.Ok) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: Colors.red,
             content: Text(
-              QrUtils.QRMessages[result.index],
+              QrUtils.QRMessages[report.error.index],
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white, fontSize: 20),
             )));
         return;
       }
 
-      var preset = device.getCustomPreset(device.selectedNuxIndex);
-      preset.setupPresetFromQRData(qrData);
+      if (report.warnings.isNotEmpty && mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('QR Import Warnings'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Some effects from the Plug Pro preset are not supported on Mighty 20 MKII. They were turned off during import.',
+                    ),
+                    const SizedBox(height: 12),
+                    for (final w in report.warnings) ...[
+                      Text('Unsupported ${w.category}: ${w.name}',
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      for (final e in w.parameters.entries)
+                        Text('${e.key}: ${e.value}'),
+                      const SizedBox(height: 8),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'))
+            ],
+          ),
+        );
+      }
       var saveDialog = SavePresetDialog(
           customName: imageName,
           customPreset: preset,

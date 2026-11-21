@@ -3,6 +3,11 @@
 
 import 'package:flutter/material.dart';
 
+import 'dart:convert';
+
+import 'package:qr_utils/qr_utils.dart';
+
+import '../NuxConstants.dart';
 import '../NuxFXID.dart';
 import '../effects/Processor.dart';
 import '../effects/plug_pro/Amps.dart';
@@ -10,6 +15,7 @@ import '../effects/plug_pro/Delay.dart';
 import '../effects/plug_pro/Modulation.dart';
 import '../effects/plug_pro/Reverb.dart';
 import 'PlugProPreset.dart';
+import 'qr_import_report.dart';
 
 /// Mighty 20 MKII preset.
 ///
@@ -103,6 +109,264 @@ class Mighty20Mk2Preset extends PlugProPreset {
     }
     return slots;
   }
+
+  static const int _plugProQrId = 15;
+  static const int _plugProQrVersion = 1;
+
+  @override
+  QrImportReport setupPresetFromQRDataReport(String qrData,
+      {bool sendToDevice = true}) {
+    if (!qrData.contains(QrUtils.nuxQRPrefix)) {
+      return const QrImportReport(PresetQRError.UnsupportedFormat);
+    }
+
+    final b64Data = qrData.substring(QrUtils.nuxQRPrefix.length);
+    final data = base64Decode(b64Data);
+    if (data.length < 3) {
+      return const QrImportReport(PresetQRError.UnsupportedFormat);
+    }
+
+    final qrId = data[0];
+    final qrVer = data[1];
+
+    if (qrId == device.deviceQRId && qrVer == device.deviceQRVersion) {
+      final payload = List<int>.from(data.sublist(2));
+      _scrubCabFromPayload(payload);
+      setupPresetFromNuxDataArray(payload);
+      if (sendToDevice) device.deviceControl.sendFullPresetSettings();
+      return QrImportReport.ok;
+    }
+
+    if (qrId == _plugProQrId && qrVer == _plugProQrVersion) {
+      return _importFromPlugProQr(data.sublist(2), sendToDevice: sendToDevice);
+    }
+
+    if (qrId != device.deviceQRId) {
+      return const QrImportReport(PresetQRError.WrongDevice);
+    }
+    return const QrImportReport(PresetQRError.WrongFWVersion);
+  }
+
+  QrImportReport _importFromPlugProQr(List<int> nuxData,
+      {required bool sendToDevice}) {
+    final warnings = <QrImportWarning>[];
+    final converted = List<int>.from(nuxData);
+
+    _convertPlugProEffect(
+      converted,
+      nuxData,
+      PresetDataIndexPlugPro.Head_iAMP,
+      _plugProAmps(),
+      isSupported: (p) => isAmpAvailable(p as Amplifier),
+      mk2NuxIndex: (p) => p.nuxIndex,
+      mk2Default: amplifierList.first,
+      category: 'Amp',
+      warnings: warnings,
+    );
+    _convertPlugProEffect(
+      converted,
+      nuxData,
+      PresetDataIndexPlugPro.Head_iMOD,
+      _plugProMods(),
+      isSupported: (p) => _mk2ModNuxIndex(p.nuxIndex) != null,
+      mk2NuxIndex: (p) => _mk2ModNuxIndex(p.nuxIndex)!,
+      mk2Default: modulationList.first,
+      category: 'Mod',
+      warnings: warnings,
+    );
+    _convertPlugProEffect(
+      converted,
+      nuxData,
+      PresetDataIndexPlugPro.Head_iDLY,
+      _plugProDelays(),
+      isSupported: (p) => _mk2DelayNuxIndex(p.nuxIndex) != null,
+      mk2NuxIndex: (p) => _mk2DelayNuxIndex(p.nuxIndex)!,
+      mk2Default: delayList.first,
+      category: 'Delay',
+      warnings: warnings,
+    );
+    _convertPlugProEffect(
+      converted,
+      nuxData,
+      PresetDataIndexPlugPro.Head_iRVB,
+      _plugProReverbs(),
+      isSupported: (p) => _mk2ReverbNuxIndex(p.nuxIndex) != null,
+      mk2NuxIndex: (p) => _mk2ReverbNuxIndex(p.nuxIndex)!,
+      mk2Default: reverbList.first,
+      category: 'Reverb',
+      warnings: warnings,
+    );
+
+    // IR/CAB must be completely ignored when importing Plug Pro QR into MKII.
+    _scrubCabFromPayload(converted);
+
+    setupPresetFromNuxDataArray(converted);
+    if (sendToDevice) device.deviceControl.sendFullPresetSettings();
+    return QrImportReport(PresetQRError.Ok, warnings);
+
+  }
+
+  void _scrubCabFromPayload(List<int> payload) {
+    if (payload.length > PresetDataIndexPlugPro.Head_iCAB &&
+        cabinetList.isNotEmpty) {
+      // Use a fresh default cab instance; never import IR/CAB from QR.
+      final defaultCab = cabinetList.first;
+      defaultCab.getNuxPayload(payload, true);
+    }
+  }
+
+  void _convertPlugProEffect(
+    List<int> converted,
+    List<int> source,
+    int effectTypeIndex,
+    List<Processor> plugProList, {
+    required bool Function(Processor) isSupported,
+    required int Function(Processor) mk2NuxIndex,
+    required Processor mk2Default,
+    required String category,
+    required List<QrImportWarning> warnings,
+  }) {
+    if (effectTypeIndex >= source.length) return;
+    final effectParam = source[effectTypeIndex];
+    final effectIndex = effectParam & 0x3f;
+
+    Processor? ppEffect;
+    for (final p in plugProList) {
+      if (p.nuxIndex == effectIndex) {
+        ppEffect = p;
+        break;
+      }
+    }
+    if (ppEffect == null || isSupported(ppEffect)) {
+      if (ppEffect != null) {
+        final newIndex = mk2NuxIndex(ppEffect);
+        converted[effectTypeIndex] = (effectParam & 0xc0) | (newIndex & 0x3f);
+      }
+      return;
+    }
+
+    // Unsupported on MKII: report original Plug Pro params, then replace this
+    // slot with a safe disabled MKII default. We must not keep the Plug Pro
+    // nuxIndex because it can collide with a different MKII effect model.
+    ppEffect.setupFromNuxPayload(source);
+    final params = <String, String>{};
+    for (final param in ppEffect.parameters) {
+      params[param.name] = param.formatter.toLabel(param.value);
+    }
+    warnings.add(QrImportWarning(
+      category: category,
+      name: ppEffect.name,
+      parameters: params,
+    ));
+
+    mk2Default.getNuxPayload(converted, false);
+  }
+
+  static int? _mk2ModNuxIndex(int plugProNuxIndex) {
+    const map = {
+      1: 1, // CE-1
+      2: 2, // CE-2
+      3: 3, // ST Chorus
+      4: 4, // Vibrato
+      6: 5, // Flanger
+      7: 6, // Phase 90
+      8: 7, // Phase 100
+      9: 8, // S.C.F
+      10: 9, // U-Vibe
+      11: 10, // Tremolo
+      13: 11, // SCH-1
+    };
+    return map[plugProNuxIndex];
+  }
+
+  static int? _mk2DelayNuxIndex(int plugProNuxIndex) {
+    const map = {
+      1: 1,
+      2: 2,
+      3: 3,
+      4: 4,
+      6: 5, // Phi Delay
+    };
+    return map[plugProNuxIndex];
+  }
+
+  static int? _mk2ReverbNuxIndex(int plugProNuxIndex) {
+    const map = {
+      1: 1,
+      2: 2,
+      3: 3,
+      4: 4,
+      6: 5, // Damp
+    };
+    return map[plugProNuxIndex];
+  }
+
+  static List<Processor> _plugProMods() => [
+        ModCE1(),
+        ModCE2(),
+        STChorusPro(),
+        Vibrato(),
+        Detune(),
+        FlangerPro(),
+        Phase90(),
+        Phase100(),
+        SCFPro(),
+        VibePro(),
+        TremoloPro(),
+        Rotary(),
+        SCH1Pro(),
+        MonoOctave(),
+      ];
+
+  static List<Processor> _plugProDelays() => [
+        AnalogDelayV2(),
+        DigitalDelay(),
+        ModDelay(),
+        TapeEcho(),
+        PanDelay(),
+        PhiDelayPro(),
+      ];
+
+  static List<Processor> _plugProReverbs() => [
+        RoomReverb(),
+        HallReverb(),
+        PlateReverb(),
+        SpringReverb(),
+        ShimmerReverb(),
+        DampReverbPro(),
+      ];
+
+  static List<Processor> _plugProAmps() => [
+        JazzClean(),
+        DeluxeRvb(),
+        BassMate(),
+        Tweedy(),
+        TwinRvb(),
+        HiWire(),
+        CaliCrunch(),
+        ClassA15(),
+        ClassA30(),
+        Plexi100(),
+        Plexi45(),
+        Brit800(),
+        Pl1987x50(),
+        Slo100(),
+        FiremanHBE(),
+        DualRect(),
+        DIEVH4(),
+        VibroKing(),
+        Budda(),
+        MrZ38(),
+        SuperRvb(),
+        BritBlues(),
+        MatchD30(),
+        Brit2000(),
+        UberHiGain(),
+        AGL(),
+        MLD(),
+        OptimaAir(),
+        Stageman(),
+      ];
 }
 
 class _Mk2ModCE1 extends ModCE1 {

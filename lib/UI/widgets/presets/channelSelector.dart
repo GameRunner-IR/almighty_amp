@@ -11,6 +11,7 @@ import 'package:almighty_amp/platform/fileSaver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_utils/qr_utils.dart';
 import '../../../bluetooth/devices/presets/Preset.dart';
+import '../../../bluetooth/devices/presets/qr_import_report.dart';
 import '../../../bluetooth/devices/NuxDevice.dart';
 import '../../../platform/platformUtils.dart';
 import '../../theme.dart';
@@ -325,13 +326,13 @@ class _ChannelSelectorState extends State<ChannelSelector> {
         )));
   }
 
-  void setupFromQRData(String qrData) {
-    var result = widget.device.setupFromQRData(qrData);
-    bool success = result == PresetQRError.Ok;
+  void setupFromQRData(String qrData) async {
+    var report = widget.device.setupFromQRDataReport(qrData);
+    bool success = report.isOk;
     NuxDeviceControl.instance().changes.clearHistory();
     setState(() {});
 
-    var message = QrUtils.QRMessages[result.index];
+    var message = QrUtils.QRMessages[report.error.index];
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: success ? Colors.green : Colors.red,
         content: Text(
@@ -339,6 +340,62 @@ class _ChannelSelectorState extends State<ChannelSelector> {
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.white, fontSize: 20),
         )));
+
+    if (success && report.warnings.isNotEmpty) {
+      await _showQrImportWarnings(report.warnings);
+    }
+  }
+
+  Future<void> _showQrImportWarnings(List<QrImportWarning> warnings) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('QR Import Warnings'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Some effects from the Plug Pro preset are not supported on Mighty 20 MKII. They were turned off during import.',
+                ),
+                const SizedBox(height: 12),
+                for (final w in warnings) ...[
+                  Text(
+                    'Unsupported ${w.category}: ${w.name}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  if (w.parameters.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8, bottom: 8),
+                      child: Text('(No parameters)'),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, bottom: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final e in w.parameters.entries)
+                            Text('${e.key}: ${e.value}'),
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

@@ -18,6 +18,7 @@ import "NuxConstants.dart";
 import 'NuxFXID.dart';
 import 'effects/Processor.dart';
 import 'presets/Preset.dart';
+import 'presets/qr_import_report.dart';
 import 'value_formatters/ValueFormatter.dart';
 
 class NuxDeviceConfiguration {
@@ -475,13 +476,17 @@ abstract class NuxDevice extends ChangeNotifier {
   }
 
   PresetQRError setupFromQRData(String qrData) {
-    var result = selectedPatch.setupPresetFromQRData(qrData);
+    return setupFromQRDataReport(qrData).error;
+  }
 
-    if (result == PresetQRError.Ok) {
+  QrImportReport setupFromQRDataReport(String qrData) {
+    var report = selectedPatch.setupPresetFromQRDataReport(qrData);
+
+    if (report.isOk) {
       deviceControl.clearPresetData();
     }
 
-    return result;
+    return report;
   }
 
   Preset? setupDetachedPresetFromQRData(String qrData) {

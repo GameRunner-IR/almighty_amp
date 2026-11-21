@@ -139,7 +139,8 @@ abstract class Processor {
     }
     if (nuxEnableIndex != null) {
       int value = (enabled != nuxEnableInverted ? 0xff : 0) & nuxEnableMask;
-      nuxData[nuxEnableIndex!] |= value;
+      nuxData[nuxEnableIndex!] =
+          (nuxData[nuxEnableIndex!] & ~nuxEnableMask) | value;
     }
   }
 

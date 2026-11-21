@@ -59,7 +59,7 @@ class ControllerHotkey {
         } while (!device.getChannelActive(channel));
         device.setSelectedChannel(channel,
             notifyBT: true, sendFullPreset: false, notifyUI: true);
-        device.getPreset(device.selectedChannel).setupPresetFromNuxData();
+        device.selectedPatch.setupPresetFromNuxData();
         break;
       case HotkeyControl.NextChannel:
         do {
@@ -68,15 +68,15 @@ class ControllerHotkey {
         } while (!device.getChannelActive(channel));
         device.setSelectedChannel(channel,
             notifyBT: true, sendFullPreset: false, notifyUI: true);
-        device.getPreset(device.selectedChannel).setupPresetFromNuxData();
+        device.selectedPatch.setupPresetFromNuxData();
         break;
       case HotkeyControl.ChannelByIndex:
         device.setSelectedChannel(index,
             notifyBT: true, sendFullPreset: false, notifyUI: true);
-        device.getPreset(device.selectedChannel).setupPresetFromNuxData();
+        device.selectedPatch.setupPresetFromNuxData();
         break;
       case HotkeyControl.EffectSlotEnable:
-        var p = device.getPreset(device.selectedChannel);
+        var p = device.selectedPatch;
         var slot = _findSlotByFunction(control);
         if (slot != null) {
           p.setSlotEnabled(slot, true, true);
@@ -84,7 +84,7 @@ class ControllerHotkey {
         }
         break;
       case HotkeyControl.EffectSlotDisable:
-        var p = device.getPreset(device.selectedChannel);
+        var p = device.selectedPatch;
         var slot = _findSlotByFunction(control);
         if (slot != null) {
           p.setSlotEnabled(slot, false, true);
@@ -92,7 +92,7 @@ class ControllerHotkey {
         }
         break;
       case HotkeyControl.EffectSlotToggle:
-        var p = device.getPreset(device.selectedChannel);
+        var p = device.selectedPatch;
         var slot = _findSlotByFunction(control);
         if (slot != null) {
           p.setSlotEnabled(slot, !p.slotEnabled(slot), true);
@@ -100,7 +100,7 @@ class ControllerHotkey {
         }
         break;
       case HotkeyControl.EffectDecrement:
-        var p = device.getPreset(device.selectedChannel);
+        var p = device.selectedPatch;
         var slot = _findSlotByFunction(control);
         if (slot != null) {
           var effects = p.getEffectsForSlot(slot);
@@ -111,7 +111,7 @@ class ControllerHotkey {
         }
         break;
       case HotkeyControl.EffectIncrement:
-        var p = device.getPreset(device.selectedChannel);
+        var p = device.selectedPatch;
         var slot = _findSlotByFunction(control);
         if (slot != null) {
           var effects = p.getEffectsForSlot(slot);
@@ -335,7 +335,7 @@ class ControllerHotkey {
     bool deviceChanged = device != _cachedDevice;
     _cachedDevice = device;
 
-    var p = device.getPreset(device.selectedChannel);
+    var p = device.selectedPatch;
 
     //find slot and cache it
     if (deviceChanged ||
@@ -363,7 +363,7 @@ class ControllerHotkey {
     var device = NuxDeviceControl().device;
     if (index >= ControllerHandleId.values.length) return null;
     ControllerHandleId id = ControllerHandleId.values[index];
-    var p = device.getPreset(device.selectedChannel);
+    var p = device.selectedPatch;
     int? slot;
     for (int i = 0; i < device.effectsChainLength; i++) {
       if (func == HotkeyControl.EffectSlotDisable &&

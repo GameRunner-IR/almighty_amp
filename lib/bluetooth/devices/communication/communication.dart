@@ -36,7 +36,7 @@ abstract class DeviceCommunication {
 
   void sendSlotEnabledState(int slot) {
     if (!device.deviceControl.isConnected) return;
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
     var swIndex = preset
         .getEffectsForSlot(slot)[preset.getSelectedEffectForSlot(slot)]
         .midiCCEnableValue;
@@ -49,7 +49,7 @@ abstract class DeviceCommunication {
 
   void sendSlotEffect(int slot, int index) {
     if (!device.deviceControl.isConnected) return;
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
     var paramIndex = preset
         .getEffectsForSlot(slot)[preset.getSelectedEffectForSlot(slot)]
         .midiCCSelectionValue;

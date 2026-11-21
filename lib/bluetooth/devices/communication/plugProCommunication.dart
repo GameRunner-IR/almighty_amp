@@ -98,11 +98,14 @@ class PlugProCommunication extends DeviceCommunication {
 
   @override
   void saveCurrentPreset(int index) {
+    // For devices with scenes, save to the selected patch slot (program number)
+    // rather than the physical preset number.
+    final patchIndex = device.selectedNuxIndex;
     var data = createSysExMessagePro(
         SysexPrivacy.kSYSEX_PRIVATE,
         SyxMsg.kSYX_SPEC_CMD,
         SyxDir.kSYXDIR_SET,
-        [SysCtrlState.syscmd_save, index]);
+        [SysCtrlState.syscmd_save, patchIndex]);
 
     device.deviceControl.sendBLEData(data);
   }
@@ -191,7 +194,7 @@ class PlugProCommunication extends DeviceCommunication {
   }
 
   void _sendSlotData(int slot, bool enabled, int effectIndex) {
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
     var swIndex = preset
         .getEffectsForSlot(slot)[preset.getSelectedEffectForSlot(slot)]
         .midiCCEnableValue;
@@ -206,7 +209,7 @@ class PlugProCommunication extends DeviceCommunication {
   @override
   void sendSlotEnabledState(int slot) {
     if (!device.deviceControl.isConnected) return;
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
 
     var effect =
         preset.getEffectsForSlot(slot)[preset.getSelectedEffectForSlot(slot)];
@@ -217,7 +220,7 @@ class PlugProCommunication extends DeviceCommunication {
 
   void setSlotEffect(int slot, int index) {
     if (!device.deviceControl.isConnected) return;
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
     _sendSlotData(slot, preset.slotEnabled(slot), index);
   }
 
@@ -236,7 +239,7 @@ class PlugProCommunication extends DeviceCommunication {
   @override
   void sendSlotOrder() {
     if (!device.deviceControl.isConnected) return;
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
     List<NuxFXID> order = (preset as PlugProPreset).processorAtSlot;
 
     var nuxOrder = [order.length];
@@ -538,7 +541,10 @@ class PlugProCommunication extends DeviceCommunication {
 
       debugPrint('preset ${data[2] + 1}, piece ${current + 1} of $total');
 
-      var preset = device.getPreset(data[2]);
+      final patchIndex = data[2];
+      if (patchIndex < 0 || patchIndex >= device.patchesCount) continue;
+
+      var preset = device.getPreset(patchIndex);
       if (current == 0) preset.resetNuxData();
 
       preset.addNuxPayloadPiece(data.sublist(4), current, total);
@@ -548,12 +554,13 @@ class PlugProCommunication extends DeviceCommunication {
         if (!device.nuxPresetsReceived) {
           readyPresetsCount++;
 
-          if (readyPresetsCount == device.channelsCount) {
+          if (readyPresetsCount == device.patchesCount) {
             device.onPresetsReady();
             debugPrint("Presets connection step ready");
             connectionStepReady();
           } else {
-            device.deviceControl.sendBLEData(requestPresetByIndex(data[2] + 1));
+            device.deviceControl
+                .sendBLEData(requestPresetByIndex(patchIndex + 1));
           }
         }
       }
@@ -622,7 +629,7 @@ class PlugProCommunication extends DeviceCommunication {
 
     if (data[0] == SyxDir.kSYXDIR_REQ) {
       var len = data[1];
-      var preset = device.getPreset(device.selectedChannel);
+      var preset = device.selectedPatch;
 
       List<NuxFXID> order = (preset as PlugProPreset).processorAtSlot;
       order.clear();
@@ -702,7 +709,7 @@ class PlugProCommunication extends DeviceCommunication {
   }
 
   void _handleVolumeData(int vol) {
-    (device.presets[device.selectedChannel] as PlugProPreset).setVolumeRaw(vol);
+    (device.selectedPatch as PlugProPreset).setVolumeRaw(vol);
     device.deviceControl.forceNotifyListeners();
   }
 

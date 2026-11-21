@@ -63,12 +63,16 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
   Mk2Patch _patch = const Mk2Patch(0, 0);
 
   NuxMighty20Mk2(super.devControl) {
-    for (int i = 0; i < presets.length; i++) {
-      // Show only the preset number in the UI (1-7), without the "Channel"
-      // prefix used by other Plug Pro family devices.
-      presets[i] =
-          Mighty20Mk2Preset(device: this, channel: i, channelName: "${i + 1}");
-      channelNames[i] = "${i + 1}";
+    // MKII has 21 patch slots (7 presets * 3 Pro Scenes).
+    presets.clear();
+    channelNames.clear();
+    for (int i = 0; i < channelsCount; i++) {
+      channelNames.add("${i + 1}");
+    }
+    for (int i = 0; i < patchesCount; i++) {
+      final patch = Mk2Patch.fromProgramNumber(i);
+      presets.add(Mighty20Mk2Preset(
+          device: this, channel: i, channelName: "${patch.preset + 1}"));
     }
   }
 
@@ -98,12 +102,18 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
   int get proScenesCount => proScenesPerPreset;
 
   @override
+  int get patchesCount => channelsCount * proScenesPerPreset;
+
+  @override
   int get selectedProScene => _patch.scene;
 
   /// MKII patch addressing: preset 0-6 and scene 0-2 are sent as a single
-  /// Program Change number 0-20.
+  /// Program Change number 0-20. This is also the index into [presets].
   @override
   int get selectedProgramNumber => _patch.programNumber;
+
+  @override
+  int get selectedNuxIndex => selectedProgramNumber;
 
   @override
   void setSelectedChannel(int chan,
@@ -138,6 +148,8 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
     if (notifyBT) {
       deviceControl.changeDeviceChannel(selectedProgramNumber);
     }
+    // Apply the cached Nux data for this patch slot (preset*3 + scene).
+    getPreset(selectedNuxIndex).setupPresetFromNuxData();
     if (deviceControl.isConnected) sendAmpLevel();
     if (notifyUI) deviceControl.forceNotifyListeners();
   }
@@ -149,9 +161,11 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
 
     final patch = Mk2Patch.fromProgramNumber(programNumber);
     handleChannelChange(patch.preset);
-    // handleChannelChange returns to scene 1 when the physical preset
-    // changes, so restore the patch carried by the program change.
+    // handleChannelChange selects scene 1 when the physical preset changes;
+    // restore the actual patch carried by the program change and load its data.
     _patch = patch;
+    selectedPatch.setupPresetFromNuxData();
+    if (deviceControl.isConnected) sendAmpLevel();
     deviceControl.forceNotifyListeners();
   }
 

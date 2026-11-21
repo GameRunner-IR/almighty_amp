@@ -81,19 +81,25 @@ class _ChannelSelectorState extends State<ChannelSelector> {
 
     var tooltip = "";
     _presets = widget.device.getPresetsList();
-    int row1 = _width < 330 && _presets.length > 4
-        ? (_presets.length / 2).ceil()
-        : _presets.length;
+    final buttonCount = widget.device.channelsCount;
+    int row1 = _width < 330 && buttonCount > 4
+        ? (buttonCount / 2).ceil()
+        : buttonCount;
 
     double width = (_width / row1).floorToDouble();
-    for (int i = 0; i < _presets.length; i++) {
-      var col = i == widget.device.selectedChannel
-          ? _presets[widget.device.selectedChannel].channelColor
-          : disabledColor;
+    for (int i = 0; i < buttonCount; i++) {
+      final selected = i == widget.device.selectedChannel;
+      final selColor = widget.device.proScenesCount > 1
+          ? _presets[widget.device.selectedNuxIndex].channelColor
+          : _presets[widget.device.selectedChannel].channelColor;
+      final col = selected ? selColor : disabledColor;
 
+      final channelName = widget.device.channelNames.length > i
+          ? widget.device.channelNames[i]
+          : _presets[i].channelName;
       Widget buttonBody;
       if (widget.device.longChannelNames) {
-        tooltip = _presets[i].channelName;
+        tooltip = channelName;
         buttonBody = Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -106,8 +112,7 @@ class _ChannelSelectorState extends State<ChannelSelector> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6.0),
-              child: FittedBox(
-                  fit: BoxFit.fill, child: Text(_presets[i].channelName)),
+              child: FittedBox(fit: BoxFit.fill, child: Text(channelName)),
             ),
           ],
         );
@@ -124,7 +129,7 @@ class _ChannelSelectorState extends State<ChannelSelector> {
               size: 32,
             ),
             Text(
-              _presets[i].channelName,
+              channelName,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
@@ -145,7 +150,7 @@ class _ChannelSelectorState extends State<ChannelSelector> {
           } else {
             device.setSelectedChannel(i,
                 notifyBT: true, sendFullPreset: false, notifyUI: true);
-            device.getPreset(device.selectedChannel).setupPresetFromNuxData();
+            device.selectedPatch.setupPresetFromNuxData();
           }
         },
         onLongPress: () {
@@ -179,7 +184,7 @@ class _ChannelSelectorState extends State<ChannelSelector> {
     final scenesCount = device.proScenesCount;
     final selectedScene = device.selectedProScene;
     final disabledColor = Theme.of(context).disabledColor;
-    final activeColor = device.getPreset(device.selectedChannel).channelColor;
+    final activeColor = device.selectedPatch.channelColor;
 
     return Container(
       width: double.infinity,
@@ -410,13 +415,11 @@ class _ChannelSelectorState extends State<ChannelSelector> {
         if (layout == EditorLayoutMode.expand)
           Expanded(
             child: EffectSelector(
-                device: widget.device,
-                preset: _presets[widget.device.selectedChannel]),
+                device: widget.device, preset: widget.device.selectedPatch),
           )
         else
           EffectSelector(
-              device: widget.device,
-              preset: _presets[widget.device.selectedChannel])
+              device: widget.device, preset: widget.device.selectedPatch)
       ],
     );
   }

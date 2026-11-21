@@ -81,7 +81,7 @@ class NuxDeviceControl extends ChangeNotifier {
 
   double _masterVolume = 100;
 
-  ChangeStack get changes => device.presets[device.selectedChannel].changes;
+  ChangeStack get changes => device.selectedPatch.changes;
 
   bool developer = false;
   Function(List<int>)? onDataReceiveDebug;
@@ -90,7 +90,7 @@ class NuxDeviceControl extends ChangeNotifier {
     if (device.fakeMasterVolume) {
       return _masterVolume;
     } else {
-      return device.presets[device.selectedChannel].volume;
+      return device.selectedPatch.volume;
     }
   }
 
@@ -102,7 +102,7 @@ class NuxDeviceControl extends ChangeNotifier {
         device.sendAmpLevel();
       }
     } else {
-      device.presets[device.selectedChannel].volume = vol;
+      device.selectedPatch.volume = vol;
     }
   }
 
@@ -424,7 +424,7 @@ class NuxDeviceControl extends ChangeNotifier {
 
   void sendFullEffectSettings(int slot, bool force) {
     if (!isConnected) return;
-    var preset = device.getPreset(device.selectedChannel);
+    var preset = device.selectedPatch;
     Processor effect;
     int index;
 
@@ -470,7 +470,7 @@ class NuxDeviceControl extends ChangeNotifier {
 
     BLEMidiHandler.instance().clearDataQueue();
     if (!device.fakeMasterVolume) {
-      device.presets[device.selectedChannel].sendVolume();
+      device.selectedPatch.sendVolume();
     }
 
     for (var i = 0; i < device.processorList.length; i++) {
@@ -513,12 +513,12 @@ class NuxDeviceControl extends ChangeNotifier {
       }
     }
 
-    device.communication.saveCurrentPreset(device.selectedChannel);
+    device.communication.saveCurrentPreset(device.selectedNuxIndex);
 
     if (device.fakeMasterVolume) {
       _masterVolume = vol;
     }
-    requestPreset(device.selectedChannel);
+    requestPreset(device.selectedNuxIndex);
   }
 
   void resetNuxPresets() async {

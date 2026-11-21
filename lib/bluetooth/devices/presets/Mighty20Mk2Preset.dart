@@ -1,6 +1,8 @@
 // (c) 2020-2021 Dian Iliev (Tuntorius)
 // This code is licensed under MIT license (see LICENSE.md for details)
 
+import 'package:flutter/material.dart';
+
 import '../NuxFXID.dart';
 import '../effects/Processor.dart';
 import '../effects/plug_pro/Amps.dart';
@@ -90,6 +92,9 @@ class Mighty20Mk2Preset extends PlugProPreset {
       _Mk2DampReverb(),
     ];
   }
+
+  @override
+  Color get channelColor => channelColorsList[(channel ~/ 3) % channelColorsList.length];
 
   List<int> get visibleSlotIndices {
     final slots = <int>[];

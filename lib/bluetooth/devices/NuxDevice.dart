@@ -106,6 +106,16 @@ abstract class NuxDevice extends ChangeNotifier {
 
   int get selectedChannel => selectedChannelP;
 
+  /// Number of patch slots stored in [presets]. Devices without scenes have one
+  /// patch per physical channel; MKII has [channelsCount] * [proScenesCount].
+  int get patchesCount => channelsCount;
+
+  /// Index of the currently selected patch in [presets].
+  int get selectedNuxIndex => selectedChannelP;
+
+  /// Currently selected patch preset data.
+  Preset get selectedPatch => presets[selectedNuxIndex];
+
   /// Number of scenes available inside a single physical preset.
   /// Devices without scenes expose a single scene.
   int get proScenesCount => 1;
@@ -280,7 +290,7 @@ abstract class NuxDevice extends ChangeNotifier {
   void sendAmpLevel() {
     if (fakeMasterVolume) {
       //amps are at slot 1
-      var preset = getPreset(selectedChannel);
+      var preset = selectedPatch;
       var amp = preset.getEffectsForSlot(amplifierSlotIndex)[
           preset.getSelectedEffectForSlot(amplifierSlotIndex)];
       for (int i = 0; i < amp.parameters.length; i++) {
@@ -349,7 +359,7 @@ abstract class NuxDevice extends ChangeNotifier {
           notifyBT: true, sendFullPreset: false, notifyUI: true);
     }
 
-    getPreset(selectedChannel).setupPresetFromNuxData();
+    selectedPatch.setupPresetFromNuxData();
     //immediately set the amp level
     sendAmpLevel();
   }
@@ -365,7 +375,7 @@ abstract class NuxDevice extends ChangeNotifier {
     if (data.length < 3) return;
 
     //scan through the effects to find which one is controlled
-    var preset = getPreset(selectedChannel);
+    var preset = selectedPatch;
     for (int i = 0; i < effectsChainLength; i++) {
       var selected = preset.getSelectedEffectForSlot(i);
       var effect = preset.getEffectsForSlot(i)[selected];
@@ -465,7 +475,7 @@ abstract class NuxDevice extends ChangeNotifier {
   }
 
   PresetQRError setupFromQRData(String qrData) {
-    var result = presets[selectedChannel].setupPresetFromQRData(qrData);
+    var result = selectedPatch.setupPresetFromQRData(qrData);
 
     if (result == PresetQRError.Ok) {
       deviceControl.clearPresetData();
@@ -475,7 +485,7 @@ abstract class NuxDevice extends ChangeNotifier {
   }
 
   Preset? setupDetachedPresetFromQRData(String qrData) {
-    var p = getCustomPreset(selectedChannel);
+    var p = getCustomPreset(selectedNuxIndex);
 
     var result = p.setupPresetFromQRData(qrData);
     if (result == PresetQRError.Ok) return p;
@@ -608,7 +618,7 @@ abstract class NuxDevice extends ChangeNotifier {
     Preset p;
 
     if (!qrOnly) {
-      p = getPreset(selectedChannel);
+      p = getPreset(selectedNuxIndex);
     } else {
       p = getCustomPreset(nuxChannel);
     }
@@ -670,12 +680,12 @@ abstract class NuxDevice extends ChangeNotifier {
 
   Map<String, dynamic> presetToJson({Preset? customPreset}) {
     Map<String, dynamic> mainJson = {
-      "channel": selectedChannel,
+      "channel": selectedNuxIndex,
       "product_id": presetClass,
       "version": productVersion
     };
 
-    Preset p = customPreset ?? getPreset(selectedChannel);
+    Preset p = customPreset ?? selectedPatch;
 
     if (!fakeMasterVolume) mainJson["volume"] = p.volume;
     //parse all effects

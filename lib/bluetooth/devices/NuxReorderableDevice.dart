@@ -15,7 +15,7 @@ abstract class NuxReorderableDevice<T extends Preset> extends NuxDevice {
 
   @override
   int get amplifierSlotIndex {
-    var preset = getPreset(selectedChannel);
+    var preset = selectedPatch;
     for (int i = 0; i < processorList.length; i++) {
       if (preset.getFXIDFromSlot(i) == ampFXID) {
         return i;
@@ -27,7 +27,7 @@ abstract class NuxReorderableDevice<T extends Preset> extends NuxDevice {
 
   @override
   int get cabinetSlotIndex {
-    var preset = getPreset(selectedChannel);
+    var preset = selectedPatch;
     for (int i = 0; i < processorList.length; i++) {
       if (preset.getFXIDFromSlot(i) == cabFXID) {
         return i;
@@ -49,7 +49,7 @@ abstract class NuxReorderableDevice<T extends Preset> extends NuxDevice {
   int? getSlotByEffectKeyName(String key) {
     var pi = getProcessorInfoByKey(key);
     if (pi != null) {
-      T p = getPreset(selectedChannel) as T;
+      T p = selectedPatch as T;
       var index = p.getSlotFromFXID(pi.nuxFXID);
       if (index != null) return index;
     }

@@ -1,5 +1,6 @@
-# Mightier Amp
-Alternative app for controlling NUX Mighty amps series.
+# Almighty Amp
+My goal is to add all newer NUX amps (MKII series) to the mightier amp app.
+I have started with mighty20mk2. All main funtions are working, I am willing to add the other ones but I cannot do it without help because I don't own these devices. So if you have a mighty40mk2 or mighty60mk2 and some free time, you can help me add these devices to the app.
 
 ## Features
 This app aims to cover all the functionality of the original app plus many enhancements:
@@ -13,6 +14,7 @@ This app aims to cover all the functionality of the original app plus many enhan
 
 ## Supported Amps
 
+0.Mighty 20 MKII
 1.Mighty Plug / Mighty Air  
 2.Mighty Plug Pro / Mighty Space  
 3.Mighty Lite BT MKII  
@@ -30,20 +32,3 @@ Facebook groups for presets sharing and amps discussion:
 [Mighty Plug/Mighty Air](https://www.facebook.com/groups/nuxmightyplugairgroup/)  
 [Mighty Plug Pro/Mighty Space](https://www.facebook.com/groups/mightyplugpro/)  
 
-## Download
-
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=com.tuntori.mightieramp)
-[<img src="docs/ios_web_generic.png"
-     alt="Get it on Google Play"
-     height="82">](https://apps.apple.com/us/app/mightier-amp/id6447451371)
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/com.tuntori.mightieramp/)
-
-## Donation
-Mightier Amp is an open-source project that I am developing in my free time. If you find the app useful and would like to support its development, please consider making a donation. Your contribution will help me invest more time into the development of the app. Thank you for your support!
-
-<a href='https://ko-fi.com/tuntori' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' />
-&nbsp;&nbsp;[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?hosted_button_id=FZWWAM4NUFRPC)  

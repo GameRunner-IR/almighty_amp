@@ -745,13 +745,23 @@ class PlugProCommunication extends DeviceCommunication {
   void _handleTuner(int ccNumber, int value) {
     var tuner = device as Tuner;
 
-    if (ccNumber == tuner.tunerStateCC) {
+    // Accept both Plug Pro and Lite MK2 tuner CC sets: some devices (e.g. MKII)
+    // report using the Lite MK2 numbers while inheriting Plug Pro defaults.
+    if (ccNumber == tuner.tunerStateCC ||
+        ccNumber == MidiCCValuesPro.TUNER_State ||
+        ccNumber == MidiCCValuesPro.TunerLiteMK2_State) {
       config.tunerData.enabled = value == 1;
-    } else if (ccNumber == tuner.tunerNoteCC) {
+    } else if (ccNumber == tuner.tunerNoteCC ||
+        ccNumber == MidiCCValuesPro.TUNER_Note ||
+        ccNumber == MidiCCValuesPro.TunerLiteMK2_Note) {
       config.tunerData.note = value;
-    } else if (ccNumber == tuner.tunerPitchCC) {
+    } else if (ccNumber == tuner.tunerPitchCC ||
+        ccNumber == MidiCCValuesPro.TUNER_Cent ||
+        ccNumber == MidiCCValuesPro.TunerLiteMK2_Cent) {
       config.tunerData.cents = value;
-    } else if (ccNumber == tuner.tunerStringCC) {
+    } else if (ccNumber == tuner.tunerStringCC ||
+        ccNumber == MidiCCValuesPro.TUNER_Number ||
+        ccNumber == MidiCCValuesPro.TunerLiteMK2_Number) {
       config.tunerData.stringNumber = value;
     }
     tuner.notifyTunerListeners();

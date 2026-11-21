@@ -8,13 +8,15 @@ import 'platformUtils.dart';
 
 Future<String> saveFileString(String mime, String name, String data) async {
   if (PlatformUtils.isWindows) {
-    final ext = p.extension(name).replaceFirst('.', '');
-    final suggested = ext.isEmpty ? name : name;
+    final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    final suggested = ext.isNotEmpty && !name.toLowerCase().endsWith('.$ext')
+        ? '$name.$ext'
+        : name;
     final location = await fs.getSaveLocation(
       suggestedName: suggested,
-      acceptedTypeGroups: [
-        fs.XTypeGroup(label: ext.isEmpty ? 'File' : ext.toUpperCase(), extensions: ext.isEmpty ? null : [ext])
-      ],
+      acceptedTypeGroups: ext.isEmpty
+          ? const <fs.XTypeGroup>[]
+          : [fs.XTypeGroup(label: '${ext.toUpperCase()} file', extensions: [ext])],
     );
     if (location == null) return "";
     var savePath = location.path;
@@ -43,13 +45,15 @@ Future<String> saveFileString(String mime, String name, String data) async {
 
 Future<String> saveFile(String mime, String name, List<int> data) async {
   if (PlatformUtils.isWindows) {
-    final ext = p.extension(name).replaceFirst('.', '');
-    final suggested = ext.isEmpty ? name : name;
+    final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    final suggested = ext.isNotEmpty && !name.toLowerCase().endsWith('.$ext')
+        ? '$name.$ext'
+        : name;
     final location = await fs.getSaveLocation(
       suggestedName: suggested,
-      acceptedTypeGroups: [
-        fs.XTypeGroup(label: ext.isEmpty ? 'File' : ext.toUpperCase(), extensions: ext.isEmpty ? null : [ext])
-      ],
+      acceptedTypeGroups: ext.isEmpty
+          ? const <fs.XTypeGroup>[]
+          : [fs.XTypeGroup(label: '${ext.toUpperCase()} file', extensions: [ext])],
     );
     if (location == null) return "";
     var savePath = location.path;

@@ -1,6 +1,7 @@
 # Almighty Amp
 My goal is to add all newer NUX amps (MKII series) to the mightier amp app.
 I have started with mighty20mk2. All main funtions are working, I am willing to add the other ones but I cannot do it without help because I don't own these devices. So if you have a mighty40mk2 or mighty60mk2 and some free time, you can help me add these devices to the app.
+The windows version is also working, It can connect via bluetooth. I have tested it on windows 11 26H1 28000.3501, it might not work on older. you might also need to install Windows MIDI Services Tools and Windows MIDI Services Tools from this link https://github.com/microsoft/MIDI/releases 
 
 ## Features
 This app aims to cover all the functionality of the original app plus many enhancements:

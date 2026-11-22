@@ -12,6 +12,7 @@ This app aims to cover all the functionality of the original app plus many enhan
 - The app unlocks 8 secret amp models in Mighty Plug Pro and Mighty Space: Twin Rvb, Class A15, Vibro King, Budda, Brit Blues, Match D30, Brit 2000 and Uber HiGain
 - Tempo/Beat Trainer
 - Various other enhancements.
+- Experimental feature: Patches made for mighty plug pro can now be scanned and imported to Mighty 20 mkii. It's a work in progress and not perfected yet. Sometimes the imported parameters are not imported correctly but if you if you import it again, it will import correctly. so if you are importing a plug pro patch, I recommend scanning it twice or three times to make sure everything is imported correctly. Other bugs might exist in this feature. you can find patches in this website: https://mightypatches.com/
 
 ## Supported Amps
 

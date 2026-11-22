@@ -13,6 +13,7 @@ This app aims to cover all the functionality of the original app plus many enhan
 - Tempo/Beat Trainer
 - Various other enhancements.
 - Experimental feature: Patches made for mighty plug pro can now be scanned and imported to Mighty 20 mkii. It's a work in progress and not perfected yet. Sometimes the imported parameters are not imported correctly but if you if you import it again, it will import correctly. so if you are importing a plug pro patch, I recommend scanning it twice or three times to make sure everything is imported correctly. Other bugs might exist in this feature. you can find patches in this website: https://mightypatches.com/
+  please note that some reverbs/delays/amps/mods are supported in plug pro and unsupported in 20mkii. if these are present in the patch you are trying to import, the app will disable that block in the chain and gives a warning about the original settings. you can keep the block disabled or use a similar mod/reverb etc at your discretion.
 
 ## Supported Amps
 

@@ -425,6 +425,11 @@ class NuxDeviceControl extends ChangeNotifier {
   void sendFullEffectSettings(int slot, bool force) {
     if (!isConnected) return;
     var preset = device.selectedPatch;
+    var fxid = preset.getFXIDFromSlot(slot);
+    if (!device.cabinetSupport &&
+        fxid.value == PresetDataIndexPlugPro.Head_iCAB) {
+      return;
+    }
     Processor effect;
     int index;
 

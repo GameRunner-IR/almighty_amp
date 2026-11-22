@@ -87,6 +87,7 @@ abstract class BLEController {
   bool get isScanning => _isScanning;
 
   ListQueue<List<int>> dataQueue = ListQueue<List<int>>();
+  bool _isSendingQueue = false;
 
   @protected
   late List<String> Function() deviceListProvider;
@@ -149,74 +150,75 @@ abstract class BLEController {
   void dispose();
 
   void _queueSender() async {
-    //Stopwatch stopwatch = Stopwatch()..start();
-    //List<int> currentData = List<int>();
-    bool noResponse = true;
-    while (dataQueue.isNotEmpty) {
-      if (connectedDevice == null) {
-        dataQueue.clear();
-        break;
-      }
-      try {
-        if (isWriteReady) {
-          var data = dataQueue.first;
+    if (_isSendingQueue) return;
+    _isSendingQueue = true;
+    try {
+      bool noResponse = true;
+      while (dataQueue.isNotEmpty) {
+        if (connectedDevice == null) {
+          dataQueue.clear();
+          break;
+        }
+        try {
+          if (isWriteReady) {
+            var data = dataQueue.first;
 
-          //try to combine CC messages in single running message
-          //default MTU 23 bytes per packet (maybe 20???)
-          /*int elementsCount = 0;
-          if ((data[2] == MidiMessageValues.controlChange ||
-                  data[2] == MidiMessageValues.programChange) &&
-              dataQueue.length > 1) {
-            for (var element in dataQueue) {
-              if (element[2] == MidiMessageValues.controlChange ||
-                  element[2] == MidiMessageValues.programChange) {
-                elementsCount++;
-                if (elementsCount == 2) break;
-              } else {
-                break;
+            //try to combine CC messages in single running message
+            //default MTU 23 bytes per packet (maybe 20???)
+            /*int elementsCount = 0;
+            if ((data[2] == MidiMessageValues.controlChange ||
+                    data[2] == MidiMessageValues.programChange) &&
+                dataQueue.length > 1) {
+              for (var element in dataQueue) {
+                if (element[2] == MidiMessageValues.controlChange ||
+                    element[2] == MidiMessageValues.programChange) {
+                  elementsCount++;
+                  if (elementsCount == 2) break;
+                } else {
+                  break;
+                }
               }
+              List<int> dataPacket = [data[0], data[1], data[2]];
+              for (int i = 0; i < elementsCount; i++) {
+                var dataElement = dataQueue.elementAt(i);
+                dataPacket.add(dataElement[3]);
+                dataPacket.add(dataElement[4]);
+              }
+              await writeToCharacteristic(dataPacket);
+              print("Combined: ${dataPacket.toString()}");
+              for (int i = 0; i < elementsCount; i++) {
+                dataQueue.removeFirst();
+              }
+            } else {*/
+            //any other message
+            if (Platform.isAndroid &&
+                data[2] == MidiMessageValues.sysExStart &&
+                data[6] == SyxMsg.kSYX_MODULELINK) {
+              noResponse = false;
+              await Future.delayed(const Duration(milliseconds: 100));
             }
-            List<int> dataPacket = [data[0], data[1], data[2]];
-            for (int i = 0; i < elementsCount; i++) {
-              var dataElement = dataQueue.elementAt(i);
-              dataPacket.add(dataElement[3]);
-              dataPacket.add(dataElement[4]);
+            await writeToCharacteristic(data, noResponse);
+            if (Platform.isAndroid) {
+              await Future.delayed(const Duration(milliseconds: 10));
             }
-            await writeToCharacteristic(dataPacket);
-            print("Combined: ${dataPacket.toString()}");
-            for (int i = 0; i < elementsCount; i++) {
+            noResponse = true;
+            if (dataQueue.isNotEmpty && identical(dataQueue.first, data)) {
               dataQueue.removeFirst();
             }
-          } else {*/
-          //any other message
-          if (Platform.isAndroid &&
-              data[2] == MidiMessageValues.sysExStart &&
-              data[6] == SyxMsg.kSYX_MODULELINK) {
-            noResponse = false;
-            await Future.delayed(const Duration(milliseconds: 100));
+            //}
+          } else {
+            dataQueue.clear();
           }
-          await writeToCharacteristic(data, noResponse);
-          if (Platform.isAndroid) {
-            await Future.delayed(const Duration(milliseconds: 10));
-          }
-          noResponse = true;
-          dataQueue.removeFirst();
-          //}
-        } else {
-          dataQueue.clear();
+        } catch (e) {
+          debugPrint(e.toString());
         }
-      } catch (e) {
-        debugPrint(e.toString());
-
-        //noResponse = false;
-        //await Future.delayed(const Duration(milliseconds: 50));
       }
+      _onQueueEmpty?.call();
+      _onQueueEmpty = null;
+    } finally {
+      _isSendingQueue = false;
+      if (dataQueue.isNotEmpty) _queueSender();
     }
-    _onQueueEmpty?.call();
-    _onQueueEmpty = null;
-    // if (kDebugMode) {
-    //   Settings.print('sending executed in ${stopwatch.elapsed.inMilliseconds}');
-    // }
   }
 
   @protected

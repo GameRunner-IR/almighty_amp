@@ -210,6 +210,11 @@ class PlugProCommunication extends DeviceCommunication {
   void sendSlotEnabledState(int slot) {
     if (!device.deviceControl.isConnected) return;
     var preset = device.selectedPatch;
+    var fxid = preset.getFXIDFromSlot(slot);
+    if (!device.cabinetSupport &&
+        fxid.value == PresetDataIndexPlugPro.Head_iCAB) {
+      return;
+    }
 
     var effect =
         preset.getEffectsForSlot(slot)[preset.getSelectedEffectForSlot(slot)];
@@ -218,9 +223,15 @@ class PlugProCommunication extends DeviceCommunication {
     _sendSlotData(slot, preset.slotEnabled(slot), index);
   }
 
-  void setSlotEffect(int slot, int index) {
+  @override
+  void sendSlotEffect(int slot, int index) {
     if (!device.deviceControl.isConnected) return;
     var preset = device.selectedPatch;
+    var fxid = preset.getFXIDFromSlot(slot);
+    if (!device.cabinetSupport &&
+        fxid.value == PresetDataIndexPlugPro.Head_iCAB) {
+      return;
+    }
     _sendSlotData(slot, preset.slotEnabled(slot), index);
   }
 

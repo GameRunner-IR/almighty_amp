@@ -200,6 +200,14 @@ class Mighty20Mk2Preset extends PlugProPreset {
     // IR/CAB must be completely ignored when importing Plug Pro QR into MKII.
     _scrubCabFromPayload(converted);
 
+    // Plug Pro patch level does not map to the MKII volume curve. Normalize it
+    // to 0 dB only for the Plug Pro -> MKII conversion; native MKII QR imports
+    // keep their own value.
+    if (converted.length > PresetDataIndexPlugPro.MASTER) {
+      converted[PresetDataIndexPlugPro.MASTER] =
+          device.decibelFormatter!.valueToMidi7Bit(0);
+    }
+
     setupPresetFromNuxDataArray(converted);
     if (sendToDevice) device.deviceControl.sendFullPresetSettings();
     return QrImportReport(PresetQRError.Ok, warnings);

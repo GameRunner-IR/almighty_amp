@@ -13,9 +13,11 @@ import 'package:qr_utils/qr_utils.dart';
 import '../../../bluetooth/devices/presets/Preset.dart';
 import '../../../bluetooth/devices/presets/qr_import_report.dart';
 import '../../../bluetooth/devices/NuxDevice.dart';
+import '../../../bluetooth/devices/NuxMighty20Mk2.dart';
 import '../../../platform/platformUtils.dart';
 import '../../theme.dart';
 import '../../utils.dart';
+import '../thickSlider.dart';
 import 'effectSelector.dart';
 
 class ChannelSelector extends StatefulWidget {
@@ -243,6 +245,38 @@ class _ChannelSelectorState extends State<ChannelSelector> {
     );
   }
 
+  /// MKII-only Patch Level slider.
+  ///
+  /// Controls the same Plug Pro MASTER field that is sent as MIDI CC 73. The
+  /// slider is intentionally not shown for any other device.
+  Widget _createPatchLevelSlider() {
+    final device = widget.device as NuxMighty20Mk2;
+    final formatter = device.decibelFormatter!;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: Theme.of(context).disabledColor)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ThickSlider(
+        value: device.selectedPatch.volume,
+        min: formatter.min.toDouble(),
+        max: formatter.max.toDouble(),
+        label: "Patch Level",
+        labelFormatter: formatter.toLabel,
+        activeColor: device.selectedPatch.channelColor,
+        handleVerticalDrag: false,
+        maxHeight: 32,
+        onChanged: (value, skip) {
+          setState(() {
+            device.selectedPatch.setVolume(value, !skip);
+          });
+        },
+      ),
+    );
+  }
+
   qrPopupSelection(pos) async {
     switch (pos) {
       case 1: //scan qr
@@ -456,6 +490,8 @@ class _ChannelSelectorState extends State<ChannelSelector> {
                         ),
                         if (widget.device.proScenesCount > 1)
                           _createProSceneBar(),
+                        if (widget.device is NuxMighty20Mk2)
+                          _createPatchLevelSlider(),
                       ],
                     ),
                   ),

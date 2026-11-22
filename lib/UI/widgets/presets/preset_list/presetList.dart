@@ -487,7 +487,7 @@ class _PresetListState extends State<PresetList>
   }
 
   void _importPresets() {
-    if (PlatformUtils.isAndroid) {
+    if (PlatformUtils.isAndroid || PlatformUtils.isWindows) {
       openFileString("application/octet-stream").then(_onFileRead);
     } else {
       FilePicker().readFile().then((value) {
@@ -496,7 +496,8 @@ class _PresetListState extends State<PresetList>
     }
   }
 
-  void _onFileRead(String value) {
+  void _onFileRead(String? value) {
+    if (value == null || value.isEmpty) return;
     PresetsStorage().presetsFromJson(value).then((value) {
       setState(() {});
       String label =

@@ -102,6 +102,25 @@ abstract class NuxDevice extends ChangeNotifier {
 
   bool nuxPresetsReceived = false;
 
+  /// Time when each patch slot was last replaced by a QR import.
+  ///
+  /// Device preset data that is still in flight must not overwrite those
+  /// slots. The first complete device preset payload consumes the protection.
+  final Map<int, DateTime> _qrImportedPatches = <int, DateTime>{};
+
+  static const Duration _qrImportProtectionDuration = Duration(seconds: 10);
+
+  /// Returns false if [patchIndex] was recently updated from a QR code and the
+  /// incoming device payload must be ignored. The protection is consumed by
+  /// the first payload check or automatically expires after a short grace
+  /// period.
+  bool shouldApplyDevicePresetData(int patchIndex) {
+    final importedAt = _qrImportedPatches.remove(patchIndex);
+    if (importedAt == null) return true;
+    return DateTime.now().difference(importedAt) >=
+        _qrImportProtectionDuration;
+  }
+
   @protected
   int selectedChannelP = 0; //nux-based channel index
 
@@ -234,6 +253,7 @@ abstract class NuxDevice extends ChangeNotifier {
 
   void onConnect() {
     nuxPresetsReceived = false;
+    _qrImportedPatches.clear();
     //reset nux data
     for (int i = 0; i < presets.length; i++) {
       presets[i].resetNuxData();
@@ -483,6 +503,11 @@ abstract class NuxDevice extends ChangeNotifier {
     var report = selectedPatch.setupPresetFromQRDataReport(qrData);
 
     if (report.isOk) {
+      // A QR import only changes the in-app patch. Keep the cached device data
+      // from re-applying while the amp is still sending preset chunks.
+      final patchIndex = selectedNuxIndex;
+      selectedPatch.resetNuxData();
+      _qrImportedPatches[patchIndex] = DateTime.now();
       deviceControl.clearPresetData();
     }
 

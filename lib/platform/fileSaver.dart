@@ -25,7 +25,7 @@ Future<String> saveFileString(String mime, String name, String data) async {
       suggestedName: suggested,
       acceptedTypeGroups: ext.isEmpty
           ? const <fs.XTypeGroup>[]
-          : [fs.XTypeGroup(label: '${ext.toUpperCase()} Image', extensions: [ext])],
+          : [fs.XTypeGroup(label: ext.toUpperCase(), extensions: [ext])],
     );
     if (location == null) return "";
     var savePath = location.path;
@@ -71,7 +71,7 @@ Future<String> saveFile(String mime, String name, List<int> data) async {
       suggestedName: suggested,
       acceptedTypeGroups: ext.isEmpty
           ? const <fs.XTypeGroup>[]
-          : [fs.XTypeGroup(label: '${ext.toUpperCase()} Image', extensions: [ext])],
+          : [fs.XTypeGroup(label: ext.toUpperCase(), extensions: [ext])],
     );
     if (location == null) return "";
     var savePath = location.path;
@@ -98,11 +98,20 @@ Future<String> saveFile(String mime, String name, List<int> data) async {
   }
 }
 
-Future<String> openFileString(String mime) async {
+Future<String?> openFileString(String mime) async {
+  if (PlatformUtils.isWindows) {
+    final fs.XFile? file = await fs.openFile(acceptedTypeGroups: [
+      const fs.XTypeGroup(
+          label: 'Presets', extensions: ['nuxpreset', 'json']),
+      const fs.XTypeGroup(label: 'All files'),
+    ]);
+    if (file == null) return null;
+    return file.readAsString();
+  }
   const platform =
       MethodChannel("com.msvcode.filesaver/files"); //unique channel identifier
   try {
-    final result = await platform.invokeMethod(
+    final result = await platform.invokeMethod<String?>(
         "openFile", {"mime": mime, "byte_array": false}); //name in native code
 
     return result;

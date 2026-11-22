@@ -561,7 +561,13 @@ class PlugProCommunication extends DeviceCommunication {
       preset.addNuxPayloadPiece(data.sublist(4), current, total);
 
       if (preset.payloadPiecesReady()) {
-        preset.setupPresetFromNuxData();
+        if (device.shouldApplyDevicePresetData(patchIndex)) {
+          preset.setupPresetFromNuxData();
+        } else {
+          // Drop the stale device payload so later patch switches cannot
+          // resurrect it over the locally imported QR settings.
+          preset.resetNuxData();
+        }
         if (!device.nuxPresetsReceived) {
           readyPresetsCount++;
 

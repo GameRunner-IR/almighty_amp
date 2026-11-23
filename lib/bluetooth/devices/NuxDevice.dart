@@ -140,6 +140,16 @@ abstract class NuxDevice extends ChangeNotifier {
   /// Devices without scenes expose a single scene.
   int get proScenesCount => 1;
 
+  /// Maps a stored patch index to its physical channel index.
+  ///
+  /// Saved presets use [selectedNuxIndex] as their "channel". On the Mighty 20
+  /// MKII that is `preset * 3 + scene` (0-20), while UI colour lists only have
+  /// one entry per physical preset (0-6).
+  int colorChannelIndex(int patchIndex) {
+    final channel = patchIndex ~/ proScenesCount;
+    return channel.clamp(0, channelsCount - 1);
+  }
+
   /// Currently selected scene (zero based) of the physical preset.
   int get selectedProScene => 0;
 

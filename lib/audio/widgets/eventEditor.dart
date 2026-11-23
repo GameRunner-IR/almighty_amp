@@ -15,9 +15,11 @@ class EventEditor {
       context, dynamic preset, StateSetter setState) {
     var tiles = <Widget>[];
 
-    Color color = preset != null
-        ? PresetConstants.channelColorsPlug[preset["channel"]]
-        : Colors.white;
+    // AutomationEvent.channel is already mapped to a physical preset index.
+    const colors = PresetConstants.channelColorsPlug;
+    final colorIndex = colors.isEmpty ? 0 : event.channel % colors.length;
+    Color color =
+        preset != null && colors.isNotEmpty ? colors[colorIndex] : Colors.white;
     String category = preset != null
         ? PresetsStorage().findCategoryOfPreset(preset)!["name"]
         : "";

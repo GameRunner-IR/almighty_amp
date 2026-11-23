@@ -190,9 +190,10 @@ class _PaintedWaveformState extends State<PaintedWaveform> {
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 15),
-                backgroundColor: empty
+                backgroundColor: empty || widget.channelColors.isEmpty
                     ? Colors.grey
-                    : widget.channelColors[event.channel], // <-- Button color
+                    : widget.channelColors[
+                        event.channel % widget.channelColors.length], // <-- Button color
                 foregroundColor: Colors.black, // <-- Splash color
               ),
               child: Icon(widget.automation.selectedEvent == event

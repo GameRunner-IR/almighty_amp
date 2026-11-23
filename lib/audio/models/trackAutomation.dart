@@ -1,6 +1,7 @@
 // (c) 2020-2021 Dian Iliev (Tuntorius)
 // This code is licensed under MIT license (see LICENSE.md for details)
 
+import 'package:almighty_amp/bluetooth/NuxDeviceControl.dart';
 import 'package:almighty_amp/platform/presetsStorage.dart';
 
 enum AutomationEventType { preset, loop }
@@ -16,11 +17,23 @@ class AutomationEvent {
       : _preset!.containsKey("name")
           ? _preset!["name"]
           : "";
-  int get channel => _preset == null
-      ? 0
-      : _preset!.containsKey("channel")
-          ? _preset!["channel"]
-          : 0;
+  /// Physical channel index used for jam-track automation colours.
+  ///
+  /// Saved MKII presets store a patch index (0-20) in "channel", but the
+  /// colour lists are indexed by physical preset (0-6).
+  int get channel {
+    if (_preset == null || !_preset!.containsKey("channel")) return 0;
+
+    final rawChannel = _preset!["channel"];
+    if (rawChannel is! num) return 0;
+    final patchIndex = rawChannel.toInt();
+
+    final presetClass = _preset!["product_id"];
+    final device = presetClass is String
+        ? NuxDeviceControl.instance().getDeviceFromPresetClass(presetClass)
+        : null;
+    return device?.colorChannelIndex(patchIndex) ?? patchIndex;
+  }
   //uuids for presets per each device
   String _presetUuid = "";
 

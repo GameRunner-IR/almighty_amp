@@ -99,7 +99,12 @@ class WaveformPainter extends CustomPainter {
     for (int i = 0; i < automation.events.length; i++) {
       var element = automation.events[i];
 
-      var paint = channelPaints[element.channel];
+      // AutomationEvent.channel is a physical preset index. Guard against
+      // corrupt/legacy event data before indexing the colour list.
+      final ch = channelPaints.isEmpty
+          ? 0
+          : element.channel % channelPaints.length;
+      var paint = channelPaints[ch];
       if (element.type == AutomationEventType.preset &&
           element.getPresetUuid().isEmpty) paint = greyPaint;
 
@@ -114,7 +119,7 @@ class WaveformPainter extends CustomPainter {
       if (!overallWaveform) {
         var paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle())
           ..pushStyle(ui.TextStyle(
-              color: PresetConstants.channelColorsPlug[element.channel]))
+              color: PresetConstants.channelColorsPlug[ch]))
           ..addText(element.name);
         final ui.Paragraph paragraph = paragraphBuilder.build()
           ..layout(ui.ParagraphConstraints(width: size.width - 12.0 - 12.0));

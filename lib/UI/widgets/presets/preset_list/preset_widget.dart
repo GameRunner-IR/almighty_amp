@@ -125,11 +125,14 @@ class _PresetWidgetState extends State<PresetWidget> {
 
   void _changePresetChannel(Map<String, dynamic> preset) {
     List<String> channelList = [];
-    int nuxChannel = preset["channel"];
+    int nuxChannel = preset["channel"] ?? 0;
     var d = NuxDeviceControl.instance()
         .getDeviceFromPresetClass(preset["product_id"]);
 
     if (d != null) {
+      // MKII presets store a patch number (0-20), but the dialog lists the
+      // seven physical presets.
+      nuxChannel = d.colorChannelIndex(nuxChannel);
       for (int i = 0; i < d.channelsCount; i++) {
         channelList.add(d.channelName(i));
       }

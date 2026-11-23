@@ -12,8 +12,10 @@ import '../NuxFXID.dart';
 import '../effects/Processor.dart';
 import '../effects/plug_pro/Amps.dart';
 import '../effects/plug_pro/Delay.dart';
+import '../effects/plug_pro/EFX.dart';
 import '../effects/plug_pro/Modulation.dart';
 import '../effects/plug_pro/Reverb.dart';
+import '../value_formatters/ValueFormatter.dart';
 import 'PlugProPreset.dart';
 import 'qr_import_report.dart';
 
@@ -42,6 +44,9 @@ class Mighty20Mk2Preset extends PlugProPreset {
     modulationList
       ..clear()
       ..addAll(createModulationList());
+    efxList
+      ..clear()
+      ..addAll(createEfxList());
     delayList
       ..clear()
       ..addAll(createDelayList());
@@ -73,15 +78,36 @@ class Mighty20Mk2Preset extends PlugProPreset {
     ];
   }
 
+  /// EFX models available on the Mighty 20 MKII. The only difference from Plug
+  /// Pro is Touch Wah, whose unsupported Level parameter is hidden.
+  static List<EFXPro> createEfxList() {
+    return [
+      DistortionPlus(),
+      RCBoost(),
+      ACBoost(),
+      DistOne(),
+      TSDrive(),
+      BluesDrive(),
+      MorningDrive(),
+      EatDist(),
+      RedDirt(),
+      Crunch(),
+      MuffFuzz(),
+      Katana(),
+      STSinger(),
+      _Mk2TouchWahPro(),
+    ];
+  }
+
   /// Delay models available on the Mighty 20 MKII, in the correct order,
   /// with MKII hardware model IDs (nuxIndex 1..5). Pan Delay is not available;
   /// Phi Delay is the 5th delay.
   static List<DelayPro> createDelayList() {
     return [
-      AnalogDelayV2(),
-      DigitalDelay(),
-      ModDelay(),
-      TapeEcho(),
+      _Mk2AnalogDelay(),
+      _Mk2DigitalDelay(),
+      _Mk2ModDelay(),
+      _Mk2TapeEcho(),
       _Mk2PhiDelay(),
     ];
   }
@@ -91,8 +117,8 @@ class Mighty20Mk2Preset extends PlugProPreset {
   /// Damp is the 5th reverb.
   static List<Reverb> createReverbList() {
     return [
-      RoomReverb(),
-      HallReverb(),
+      _Mk2RoomReverb(),
+      _Mk2HallReverb(),
       PlateReverb(),
       SpringReverb(),
       _Mk2DampReverb(),
@@ -418,6 +444,28 @@ class _Mk2SCF extends SCFPro {
 }
 
 class _Mk2Vibe extends VibePro {
+  _Mk2Vibe() {
+    // On the MKII MOD_Para3 is the real mode switch (0 = Chorus,
+    // 1 = Vibrato); MOD_Para4 has no effect. Move that behaviour to the Mode
+    // switch and drop the misleading Intensity slider.
+    final intensity =
+        parameters.firstWhere((parameter) => parameter.handle == 'intensity');
+    final mode =
+        parameters.firstWhere((parameter) => parameter.handle == 'mode');
+
+    mode.devicePresetIndex = PresetDataIndexPlugPro.MOD_Para3;
+    mode.midiCC = MidiCCValuesPro.MOD_Para3;
+    mode.formatter = ValueFormatters.vibeModePro;
+    mode.value = 0;
+    mode.midiControllerHandle = intensity.midiControllerHandle;
+
+    parameters.removeWhere((parameter) => parameter.handle == 'intensity');
+
+    // MKII label names for the remaining controls.
+    parameters.firstWhere((p) => p.handle == 'speed').name = 'Rate';
+    parameters.firstWhere((p) => p.handle == 'volume').name = 'Depth';
+  }
+
   @override
   int get nuxIndex => 9;
 }
@@ -432,12 +480,160 @@ class _Mk2SCH1 extends SCH1Pro {
   int get nuxIndex => 11;
 }
 
+class _Mk2DigitalDelay extends DigitalDelay {
+  _Mk2DigitalDelay() {
+    final level =
+        parameters.firstWhere((parameter) => parameter.handle == 'level');
+    final time =
+        parameters.firstWhere((parameter) => parameter.handle == 'time');
+    final feedback =
+        parameters.firstWhere((parameter) => parameter.handle == 'feedback');
+
+    // On MKII DLY_Para1 is the real Time and DLY_Para3 is the real Mix.
+    // Swap the two hardware controls while keeping each formatter/controller
+    // with its semantic parameter.
+    final levelIndex = level.devicePresetIndex;
+    final levelCC = level.midiCC;
+    level.devicePresetIndex = time.devicePresetIndex;
+    level.midiCC = time.midiCC;
+    time.devicePresetIndex = levelIndex;
+    time.midiCC = levelCC;
+
+    level.name = 'Mix';
+    feedback.name = 'Repeat';
+  }
+}
+
+class _Mk2ModDelay extends ModDelay {
+  _Mk2ModDelay() {
+    final level =
+        parameters.firstWhere((parameter) => parameter.handle == 'level');
+    final repeat =
+        parameters.firstWhere((parameter) => parameter.handle == 'repeat');
+    final mod = parameters.firstWhere((parameter) => parameter.handle == 'mod');
+
+    // MKII hardware controls: DLY_Para2 = Repeat, DLY_Para4 = Mod,
+    // DLY_Para3 = Mix. Rotate the three controls so each label drives the
+    // right thing. Time (DLY_Para1) is already correct and stays as-is.
+    final levelIndex = level.devicePresetIndex;
+    final levelCC = level.midiCC;
+
+    level.devicePresetIndex = mod.devicePresetIndex;
+    level.midiCC = mod.midiCC;
+    mod.devicePresetIndex = repeat.devicePresetIndex;
+    mod.midiCC = repeat.midiCC;
+    repeat.devicePresetIndex = levelIndex;
+    repeat.midiCC = levelCC;
+
+    level.name = 'Mix';
+  }
+}
+
+class _Mk2TapeEcho extends TapeEcho {
+  _Mk2TapeEcho() {
+    final level =
+        parameters.firstWhere((parameter) => parameter.handle == 'level');
+    final repeat =
+        parameters.firstWhere((parameter) => parameter.handle == 'repeat');
+
+    // MKII hardware controls: DLY_Para3 = Mix, DLY_Para2 = Repeat.
+    // Swap only the hardware capabilities; each slider keeps its own MIDI
+    // controller handle and gets the name matching what it now controls.
+    final levelIndex = level.devicePresetIndex;
+    final levelCC = level.midiCC;
+
+    level.devicePresetIndex = repeat.devicePresetIndex;
+    level.midiCC = repeat.midiCC;
+
+    repeat.devicePresetIndex = levelIndex;
+    repeat.midiCC = levelCC;
+
+    level.name = 'Mix';
+    repeat.name = 'Repeat';
+  }
+}
+
+class _Mk2AnalogDelay extends AnalogDelayV2 {
+  _Mk2AnalogDelay() {
+    // MKII labels for the same hardware controls.
+    for (final parameter in parameters) {
+      switch (parameter.handle) {
+        case 'rate':
+          parameter.name = 'Time';
+          break;
+        case 'intensity':
+          parameter.name = 'Mix';
+          break;
+        case 'echo':
+          parameter.name = 'Repeat';
+          break;
+      }
+    }
+  }
+}
+
 class _Mk2PhiDelay extends PhiDelayPro {
   @override
   int get nuxIndex => 5;
 }
 
 class _Mk2DampReverb extends DampReverbPro {
+  _Mk2DampReverb() {
+    // On the MKII the control wired to RVB_Para1 is the real Decay and the
+    // one wired to RVB_Para2 is the real Level. Keep indices/handles intact.
+    for (final parameter in parameters) {
+      if (parameter.handle == 'mix') {
+        parameter.name = 'Decay';
+      } else if (parameter.handle == 'depth') {
+        parameter.name = 'Level';
+      }
+    }
+  }
+
   @override
   int get nuxIndex => 5;
+}
+
+/// On the MKII the Room reverb hardware labels are swapped: the control wired
+/// to RVB_Para2 is the actual Level, and the one wired to RVB_Para3 is the
+/// actual Tone. Keep payload indices and handles unchanged so saved presets
+/// and MIDI controller assignments keep working; only swap the visible text.
+class _Mk2RoomReverb extends RoomReverb {
+  _Mk2RoomReverb() {
+    for (final parameter in parameters) {
+      if (parameter.handle == 'tone') {
+        parameter.name = 'Level';
+      } else if (parameter.handle == 'level') {
+        parameter.name = 'Tone';
+      }
+    }
+  }
+}
+
+/// On the MKII Hall reverb, the parameter wired to RVB_Para4 (Plug Pro's
+/// "Level") has no effect, so it is removed. RVB_Para2 is the real Level and
+/// RVB_Para3 is the real Tone. Handles and payload indices stay unchanged.
+class _Mk2HallReverb extends HallReverb {
+  _Mk2HallReverb() {
+    parameters.removeWhere((parameter) => parameter.handle == 'level');
+    for (final parameter in parameters) {
+      if (parameter.handle == 'predelay') {
+        parameter.name = 'Level';
+      } else if (parameter.handle == 'liveliness') {
+        parameter.name = 'Tone';
+      }
+    }
+  }
+}
+
+/// MKII Touch Wah keeps the same hardware model ID, but its Level parameter
+/// and Up/Down Switch are not supported by the device. Removing them from the
+/// parameter list hides their sliders and prevents the unused CCs from being
+/// sent. Plug Pro's own TouchWahPro instance is untouched.
+class _Mk2TouchWahPro extends TouchWahPro {
+  _Mk2TouchWahPro() {
+    // The MKII supports neither the Touch Wah Level nor its Up/Down Switch.
+    parameters.removeWhere((parameter) =>
+        parameter.handle == 'level' || parameter.handle == 'direction');
+  }
 }

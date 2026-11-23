@@ -55,6 +55,47 @@ class Mighty20Mk2Preset extends PlugProPreset {
       ..addAll(createReverbList());
   }
 
+  /// Native MKII QRs from the official app leave the CAB count, CAB parameters
+  /// and LINK9 empty. Mirror that layout; sending a CAB id to the amp makes the
+  /// hardware freeze until it is power-cycled.
+  @override
+  List<int> createNuxDataFromPreset() {
+    final data = super.createNuxDataFromPreset();
+    // The returned QR data has the 2-byte device header in front.
+    const headerLength = 2;
+    data[headerLength + PresetDataIndexPlugPro.Head_iCAB] = 0;
+    for (final index in [
+      PresetDataIndexPlugPro.CAB_Count,
+      PresetDataIndexPlugPro.CAB_Para1,
+      PresetDataIndexPlugPro.CAB_Para2,
+      PresetDataIndexPlugPro.CAB_Para3,
+      PresetDataIndexPlugPro.CAB_Para4,
+      PresetDataIndexPlugPro.CAB_Para5,
+      PresetDataIndexPlugPro.CAB_Para6,
+    ]) {
+      data[headerLength + index] = 0;
+    }
+
+    // The official app uses 0 (the Wah slot id) wherever the MKII has no CAB.
+    // Replace CAB wherever it appears in the chain, not just in LINK9.
+    for (final link in [
+      PresetDataIndexPlugPro.LINK1,
+      PresetDataIndexPlugPro.LINK2,
+      PresetDataIndexPlugPro.LINK3,
+      PresetDataIndexPlugPro.LINK4,
+      PresetDataIndexPlugPro.LINK5,
+      PresetDataIndexPlugPro.LINK6,
+      PresetDataIndexPlugPro.LINK7,
+      PresetDataIndexPlugPro.LINK8,
+      PresetDataIndexPlugPro.LINK9,
+    ]) {
+      if (data[headerLength + link] == PresetDataIndexPlugPro.Head_iCAB) {
+        data[headerLength + link] = 0;
+      }
+    }
+    return data;
+  }
+
   /// Amps that the Mighty 20 MKII does not provide.
   static bool isAmpAvailable(Amplifier amp) {
     return amp is! AGL && amp is! MLD && amp is! OptimaAir && amp is! Stageman;

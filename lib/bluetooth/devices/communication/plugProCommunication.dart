@@ -247,19 +247,38 @@ class PlugProCommunication extends DeviceCommunication {
     device.deviceControl.sendBLEData(data);
   }
 
-  @override
-  void sendSlotOrder() {
-    if (!device.deviceControl.isConnected) return;
+  /// Builds the effect-chain order payload.
+  ///
+  /// The Mighty 20 MKII has no CAB block. The official app uses id 0 (Wah) in
+  /// that slot; sending the Plug Pro CAB id freezes the amp until it is
+  /// power-cycled. Unknown ids are passed through so a QR-imported Wah slot is
+  /// not silently dropped from the chain.
+  List<int> buildSlotOrder() {
     var preset = device.selectedPatch;
     List<NuxFXID> order = (preset as PlugProPreset).processorAtSlot;
 
     var nuxOrder = [order.length];
     for (var i = 0; i < order.length; i++) {
+      if (!device.cabinetSupport &&
+          order[i].value == PresetDataIndexPlugPro.Head_iCAB) {
+        nuxOrder.add(0);
+        continue;
+      }
       var p = device.getProcessorInfoByFXID(order[i]);
-      if (p != null) nuxOrder.add(p.nuxFXID.toInt());
+      if (p != null) {
+        nuxOrder.add(p.nuxFXID.toInt());
+      } else if (!device.cabinetSupport) {
+        nuxOrder.add(order[i].value);
+      }
     }
+    return nuxOrder;
+  }
+
+  @override
+  void sendSlotOrder() {
+    if (!device.deviceControl.isConnected) return;
     var data = createSysExMessagePro(SysexPrivacy.kSYSEX_PRIVATE,
-        SyxMsg.kSYX_MODULELINK, SyxDir.kSYXDIR_SET, nuxOrder);
+        SyxMsg.kSYX_MODULELINK, SyxDir.kSYXDIR_SET, buildSlotOrder());
     device.deviceControl.sendBLEData(data);
     _lastEffectReorder = DateTime.now();
   }

@@ -539,6 +539,10 @@ abstract class NuxDevice extends ChangeNotifier {
     }
   }
 
+  /// Exports the patch stored at [channel], which is an index into [presets].
+  ///
+  /// Devices with Pro Scenes (Mighty 20 MKII) have more patches than physical
+  /// channels, so callers must pass [selectedNuxIndex], not [selectedChannel].
   String channelToQR(int channel) {
     var data = presets[channel].createNuxDataFromPreset();
     return "${QrUtils.nuxQRPrefix}${base64Encode(data)}";

@@ -327,7 +327,9 @@ class _ChannelSelectorState extends State<ChannelSelector> {
         }
         break;
       case 3:
-        var qr = widget.device.channelToQR(widget.device.selectedChannel);
+        // Presets are indexed by patch, not by physical channel. They differ
+        // on the Mighty 20 MKII (7 physical presets x 3 Pro Scenes).
+        var qr = widget.device.channelToQR(widget.device.selectedNuxIndex);
         var name = widget.device.deviceControl.presetName;
         Image img = await QrUtils.generateQR(qr);
         if (name.isEmpty) {

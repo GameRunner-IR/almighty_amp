@@ -105,6 +105,17 @@ class NuxMightyPlugPro extends NuxReorderableDevice<PlugProPreset>
     });
   }
 
+  /// MKII-only: remember the Bluetooth EQ bands and the two AUX toggles.
+  /// The extra trailing entries keep the old four-value list readable.
+  void persistMK2BluetoothEQ() {
+    if (supportsBTEQReadback) return;
+    SharedPrefs().setValue(SettingsKeys.mk2BluetoothEQ, [
+      ...config.bluetoothEQ.parameters.map((param) => param.midiValue),
+      config.bluetoothInvertChannel ? 1 : 0,
+      config.bluetoothEQMute ? 1 : 0,
+    ]);
+  }
+
   String versionDate = "";
   bool version2024July = true;
 

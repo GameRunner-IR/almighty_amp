@@ -434,12 +434,14 @@ class PlugProCommunication extends DeviceCommunication {
         final ccData = createCCMessage(param.midiCC, param.midiValue);
         device.deviceControl.sendBLEData(ccData);
       }
+      // The toggles live on the same AUX CC bus and are reset by the same
+      // hardware operation, so re-send them as well.
+      device.deviceControl.sendBLEData(createCCMessage(
+          MidiCCValuesPro.AUX_PHASE, config.bluetoothInvertChannel ? 1 : 0));
+      device.deviceControl.sendBLEData(createCCMessage(
+          MidiCCValuesPro.AUX_MUTE, config.bluetoothEQMute ? 1 : 0));
       // No usable hardware read-back exists, so keep the saved values locally.
-      SharedPrefs().setValue(
-          SettingsKeys.mk2BluetoothEQ,
-          config.bluetoothEQ.parameters
-              .map((param) => param.midiValue)
-              .toList());
+      (device as NuxMightyPlugPro).persistMK2BluetoothEQ();
       return;
     }
 
@@ -1032,23 +1034,30 @@ const z = {
 
   /// MKII AUX EQ values arrive as CC echoes (the same path the effect editor
   /// uses for hardware knobs), since its kSYX_BTSET reply is only raw `15`.
+  /// The phase and mute toggles use the same bus, so they follow the same path.
   bool _handleBTEQCCData(int cc, int value) {
     if (device is! NuxMightyPlugPro) return false;
-    if ((device as NuxMightyPlugPro).supportsBTEQReadback) return false;
+    final mk2 = device as NuxMightyPlugPro;
+    if (mk2.supportsBTEQReadback) return false;
 
-    final eq = config.bluetoothEQ;
-    int? changedIndex;
-    for (int i = 0; i < eq.parameters.length; i++) {
-      if (eq.parameters[i].midiCC == cc) {
-        changedIndex = i;
-        break;
+    if (cc == MidiCCValuesPro.AUX_PHASE) {
+      mk2.config.bluetoothInvertChannel = value > 0;
+    } else if (cc == MidiCCValuesPro.AUX_MUTE) {
+      mk2.config.bluetoothEQMute = value > 0;
+    } else {
+      final eq = config.bluetoothEQ;
+      int? changedIndex;
+      for (int i = 0; i < eq.parameters.length; i++) {
+        if (eq.parameters[i].midiCC == cc) {
+          changedIndex = i;
+          break;
+        }
       }
+      if (changedIndex == null) return false;
+      eq.parameters[changedIndex].midiValue = value;
     }
-    if (changedIndex == null) return false;
 
-    eq.parameters[changedIndex].midiValue = value;
-    SharedPrefs().setValue(SettingsKeys.mk2BluetoothEQ,
-        eq.parameters.map((param) => param.midiValue).toList());
+    mk2.persistMK2BluetoothEQ();
     device.deviceControl.forceNotifyListeners();
     return true;
   }
@@ -1110,6 +1119,8 @@ const z = {
             case MidiCCValuesPro.AUX_BAND_2:
             case MidiCCValuesPro.AUX_BAND_3:
             case MidiCCValuesPro.AUX_BAND_4:
+            case MidiCCValuesPro.AUX_PHASE:
+            case MidiCCValuesPro.AUX_MUTE:
               if (_handleBTEQCCData(data[3], data[4])) return;
               break;
             case MidiCCValuesPro.USBROUNT_1:

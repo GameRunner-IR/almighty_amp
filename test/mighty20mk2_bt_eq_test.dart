@@ -238,4 +238,45 @@ void main() {
     // No Cab Sim readback was parsed from the truncated frame.
     expect(device.config.mk2CabSim, false);
   });
+
+  List<int> cc(int control, int value) => [
+        0x80,
+        0x80,
+        MidiMessageValues.controlChange,
+        control,
+        value,
+      ];
+
+  test('MKII AUX phase and mute follow CC echoes and survive a restart', () {
+    final device = NuxMighty20Mk2(NuxDeviceControl.instance());
+    final communication = device.communication as PlugProCommunication;
+
+    communication.onDataReceive(cc(MidiCCValuesPro.AUX_PHASE, 1));
+    communication.onDataReceive(cc(MidiCCValuesPro.AUX_MUTE, 1));
+    expect(device.config.bluetoothInvertChannel, true);
+    expect(device.config.bluetoothEQMute, true);
+
+    final reopened = NuxMighty20Mk2(NuxDeviceControl.instance());
+    expect(reopened.config.bluetoothInvertChannel, true);
+    expect(reopened.config.bluetoothEQMute, true);
+
+    // Turning them off must be echoed back and persisted too.
+    final reopenedComm = reopened.communication as PlugProCommunication;
+    reopenedComm.onDataReceive(cc(MidiCCValuesPro.AUX_PHASE, 0));
+    reopenedComm.onDataReceive(cc(MidiCCValuesPro.AUX_MUTE, 0));
+    expect(reopened.config.bluetoothInvertChannel, false);
+    expect(reopened.config.bluetoothEQMute, false);
+    expect(NuxMighty20Mk2(NuxDeviceControl.instance()).config.bluetoothEQMute,
+        false);
+  });
+
+  test('Plug Pro keeps SysEx readback for the AUX toggles', () {
+    final plugPro = NuxMightyPlugPro(NuxDeviceControl.instance());
+    final communication = plugPro.communication as PlugProCommunication;
+
+    communication.onDataReceive(cc(MidiCCValuesPro.AUX_PHASE, 1));
+    communication.onDataReceive(cc(MidiCCValuesPro.AUX_MUTE, 1));
+    expect(plugPro.config.bluetoothInvertChannel, false);
+    expect(plugPro.config.bluetoothEQMute, false);
+  });
 }

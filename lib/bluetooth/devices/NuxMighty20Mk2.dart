@@ -94,6 +94,16 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
         eq.parameters[i].midiValue = raw;
       }
     }
+    // Newer saves append the AUX phase/mute flags. Old four-value saves leave
+    // the defaults in place.
+    if (stored.length > eq.parameters.length) {
+      final invert = stored[eq.parameters.length];
+      if (invert is int) config.bluetoothInvertChannel = invert > 0;
+    }
+    if (stored.length > eq.parameters.length + 1) {
+      final mute = stored[eq.parameters.length + 1];
+      if (mute is int) config.bluetoothEQMute = mute > 0;
+    }
   }
 
   @override

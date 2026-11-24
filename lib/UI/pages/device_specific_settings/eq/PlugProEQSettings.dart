@@ -175,11 +175,7 @@ class _PlugProEQSettingsState extends State<PlugProEQSettings> {
   void _changeEQValue(Parameter parameter, double value, bool skip) {
     parameter.value = value;
     setState(() {
-      if (!skip) {
-        debugPrint(
-            "BT EQ: write band=${parameter.name} cc=${parameter.midiCC} value=$value midi=${parameter.midiValue}");
-        NuxDeviceControl.instance().sendParameter(parameter, false);
-      }
+      if (!skip) NuxDeviceControl.instance().sendParameter(parameter, false);
     });
   }
 }

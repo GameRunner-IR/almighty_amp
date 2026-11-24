@@ -35,12 +35,6 @@ class PlugProCommunication extends DeviceCommunication {
   /// A toggle request that arrived before the first SYSTEMSET reply.
   bool? _pendingMK2CabSim;
 
-  String _dumpIndexed(List<int> data) => data
-      .asMap()
-      .entries
-      .map((entry) => "${entry.key}:${entry.value}")
-      .join(" ");
-
   /// Ask the MKII for a fresh copy of the global state that backs the USB
   /// Audio Settings page. Cab Sim lives in SYSTEMSET payload byte 5; the
   /// other USB values arrive through CC echoes instead.
@@ -48,8 +42,6 @@ class PlugProCommunication extends DeviceCommunication {
     if (!device.deviceControl.isConnected || !_isMK2Usb) return;
     final systemSet = _requestSystemSettings();
     final currentState = _requestMicSettings();
-    debugPrint("USB Audio: request SYSTEMSET bytes=$systemSet");
-    debugPrint("USB Audio: request CURSTATE bytes=$currentState");
     device.deviceControl.sendBLEData(systemSet);
     device.deviceControl.sendBLEData(currentState);
   }
@@ -65,13 +57,11 @@ class PlugProCommunication extends DeviceCommunication {
       // The USB page requests a readback on open. Keep the user's choice and
       // send it as soon as that reply supplies a valid template.
       _pendingMK2CabSim = enabled;
-      debugPrint("USB Audio: Cab Sim waiting for SYSTEMSET template");
       requestMK2UsbSettingsReadback();
       return;
     }
 
     final data = buildMK2CabSimMessage(enabled, template);
-    debugPrint("USB Audio: SET Cab Sim=${enabled ? 1 : 0} bytes=$data");
     device.deviceControl.sendBLEData(data);
   }
 
@@ -214,7 +204,6 @@ class PlugProCommunication extends DeviceCommunication {
     if (!device.deviceControl.isConnected) return;
     var data = createSysExMessagePro(SysexPrivacy.kSYSEX_PRIVATE,
         SyxMsg.kSYX_BTSET, SyxDir.kSYXDIR_REQ, [index]);
-    debugPrint("BT EQ: request group=$index bytes=$data");
     // Retire any previous controller and create the new one before sending,
     // so a fast reply cannot be missed and a closed controller cannot leak.
     _bluetoothEQReceived?.close();
@@ -430,7 +419,6 @@ class PlugProCommunication extends DeviceCommunication {
   void setBTEq(int eq) {
     if (!device.deviceControl.isConnected) return;
     var data = createCCMessage(MidiCCValuesPro.AUXEQENABLE, eq);
-    debugPrint("BT EQ: set group=$eq bytes=$data");
     device.deviceControl.sendBLEData(data);
   }
 
@@ -442,10 +430,8 @@ class PlugProCommunication extends DeviceCommunication {
       // The MKII applies AUX EQ CCs immediately. Sending the Plug Pro save
       // SysEx to it resets every band to raw 15 (-10.5 dB), so re-send the
       // live values instead of issuing that command.
-      debugPrint("BT EQ: MKII skip auxeqsave, re-sending live CC values");
       for (final param in config.bluetoothEQ.parameters) {
         final ccData = createCCMessage(param.midiCC, param.midiValue);
-        debugPrint("BT EQ: SAVE band=${param.name} bytes=$ccData");
         device.deviceControl.sendBLEData(ccData);
       }
       // No usable hardware read-back exists, so keep the saved values locally.
@@ -462,7 +448,6 @@ class PlugProCommunication extends DeviceCommunication {
         SyxMsg.kSYX_SPEC_CMD,
         SyxDir.kSYXDIR_SET,
         [SysCtrlState.speccmd_auxeqsave, group]);
-    debugPrint("BT EQ: SAVE group=$group bytes=$data");
     device.deviceControl.sendBLEData(data);
   }
 
@@ -933,12 +918,9 @@ class PlugProCommunication extends DeviceCommunication {
     // A SET can be answered with a short ACK. It is not a full SYSTEMSET
     // payload, so none of the indexed fields below are available.
     if (data.length < 22) {
-      debugPrint(
-          "USB Audio: short SYSTEMSET ignored len=${data.length} data=$data");
       return;
     }
     if (_isMK2Usb) {
-      debugPrint("USB Audio: SYSTEMSET payload=${_dumpIndexed(data)}");
       // Unlike the other USB values, byte 5 is a real MKII Cab Sim readback
       // (1 = on, 0 = off). Keep the full reply as a template for writes.
       _lastMK2SystemSet = List<int>.from(data);
@@ -949,7 +931,6 @@ class PlugProCommunication extends DeviceCommunication {
           (device as NuxMightyPlugPro).persistMK2UsbAudio();
           device.deviceControl.forceNotifyListeners();
         }
-        debugPrint("USB Audio: Cab Sim readback=${readback ? 1 : 0}");
       }
       final pending = _pendingMK2CabSim;
       if (pending != null) {
@@ -1006,9 +987,6 @@ const z = {
   }
 
   void _handleMicSettings(List<int> data) {
-    if (_isMK2Usb) {
-      debugPrint("USB Audio: CURSTATE payload=${_dumpIndexed(data)}");
-    }
     // A short ACK does not carry the mic/Speaker EQ fields below.
     if (data.length < 6) return;
     if (data[0] == SyxDir.kSYXDIR_REQ) {
@@ -1047,7 +1025,6 @@ const z = {
       default:
         return false;
     }
-    debugPrint("USB Audio: CC echo cc=$cc value=$value");
     (device as NuxMightyPlugPro).persistMK2UsbAudio();
     device.deviceControl.forceNotifyListeners();
     return true;
@@ -1070,8 +1047,6 @@ const z = {
     if (changedIndex == null) return false;
 
     eq.parameters[changedIndex].midiValue = value;
-    debugPrint(
-        "BT EQ: CC echo band=${eq.parameters[changedIndex].name} cc=$cc value=$value");
     SharedPrefs().setValue(SettingsKeys.mk2BluetoothEQ,
         eq.parameters.map((param) => param.midiValue).toList());
     device.deviceControl.forceNotifyListeners();
@@ -1080,12 +1055,10 @@ const z = {
 
   void _handleBTEqData(List<int> data) {
     if (data.isEmpty) return;
-    debugPrint("BT EQ: reply dir=${data[0]} raw=$data");
     // Reply direction can be REQ (Plug Pro) or GET (MKII) depending on the
     // request we sent, so accept both.
     if (data[0] == SyxDir.kSYXDIR_REQ || data[0] == SyxDir.kSYXDIR_GET) {
       final payload = data.length > 2 ? data.sublist(2) : <int>[];
-      debugPrint("BT EQ: band payload=$payload");
       _bluetoothEQReceived?.add(payload);
       _bluetoothEQReceived?.close();
       // Null it so a later unsolicited BTSET message cannot add to a closed
@@ -1109,14 +1082,6 @@ const z = {
   @override
   void onDataReceive(List<int> data) {
     if (data.length > 2) {
-      // Keep short MKII messages visible in the Debug Console so USB
-      // read-backs can be verified. Preset chunks are large and skipped.
-      final isCC = data[2] == MidiMessageValues.controlChange;
-      final isShortSysEx =
-          data[2] == MidiMessageValues.sysExStart && data.length < 32;
-      if (_isMK2Usb && (isCC || isShortSysEx)) {
-        debugPrint("MKII RX: $data");
-      }
       switch (data[2]) {
         case MidiMessageValues.controlChange:
           switch (data[3]) {
@@ -1207,10 +1172,6 @@ const z = {
                   _handleLooperSysEx(data.sublist(7));
                   return;
                 case SyxMsg.kSYX_SENDCMD:
-                  if (_isMK2Usb) {
-                    debugPrint(
-                        "USB Audio: SENDCMD cmd=${data[8]} payload=${_dumpIndexed(data.sublist(8))}");
-                  }
                   if (data[7] == SyxDir.kSYXDIR_REQ) {
                     switch (data[8]) {
                       case SyxMsg.kSYX_MODULELINK:

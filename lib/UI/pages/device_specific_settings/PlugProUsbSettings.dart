@@ -65,7 +65,7 @@ class _PlugProUsbSettingsState extends State<PlugProUsbSettings> {
     NuxDeviceControl.instance().addListener(_onDeviceChanged);
     // On the MKII the other USB values are not carried by SYSTEMSET, but
     // Cab Sim is. Request a fresh read-back while this page is open so the
-    // toggle reflects the hardware and the frame is visible when debugging.
+    // toggle reflects the hardware state.
     final communication = NuxDeviceControl.instance().device.communication;
     if (communication is PlugProCommunication) {
       communication.requestMK2UsbSettingsReadback();

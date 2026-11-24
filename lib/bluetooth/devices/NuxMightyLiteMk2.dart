@@ -270,4 +270,8 @@ class NuxMightyLiteMk2 extends NuxDevice
     _config.usbDryWet = vol;
     _communication.setUsbDryWet(vol);
   }
+
+  // No global Cab Sim setting on Lite MKII.
+  @override
+  void setUsbCabSim(bool enabled) {}
 }

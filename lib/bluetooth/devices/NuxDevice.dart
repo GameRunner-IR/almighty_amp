@@ -78,6 +78,17 @@ abstract class NuxDevice extends ChangeNotifier {
   ValueFormatter? get decibelFormatter => null;
   bool get jamTrackChannelChange => false;
 
+  /// Whether the global Settings page shows automatic cabinet matching.
+  /// Devices without cabinet switching can override this to hide the option.
+  bool get showMatchingCabinetsSetting => true;
+
+  /// Whether the device settings page shows microphone controls.
+  bool get showMicrophoneSettings => true;
+
+  /// Whether the USB Audio Settings page shows the MKII-only Cab Sim toggle.
+  /// Other devices do not implement this global setting.
+  bool get showUsbCabSimSetting => false;
+
   int get deviceQRId;
   int get deviceQRVersion;
   int get channelChangeCC;
@@ -117,8 +128,7 @@ abstract class NuxDevice extends ChangeNotifier {
   bool shouldApplyDevicePresetData(int patchIndex) {
     final importedAt = _qrImportedPatches.remove(patchIndex);
     if (importedAt == null) return true;
-    return DateTime.now().difference(importedAt) >=
-        _qrImportProtectionDuration;
+    return DateTime.now().difference(importedAt) >= _qrImportProtectionDuration;
   }
 
   @protected

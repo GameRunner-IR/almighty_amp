@@ -13,6 +13,7 @@ import 'communication/communication.dart';
 import 'communication/plugProCommunication.dart';
 
 import '../NuxDeviceControl.dart';
+import '../../platform/simpleSharedPrefs.dart';
 import 'NuxDevice.dart';
 import 'device_data/drumstyles.dart';
 import 'effects/Processor.dart';
@@ -39,6 +40,10 @@ class NuxPlugProConfiguration extends NuxDeviceConfiguration {
   int recLevel = 50;
   int playbackLevel = 50;
   int usbDryWet = 50;
+
+  /// MKII-only USB setting read from SYSTEMSET payload byte 5.
+  /// 1 = Cab Sim on, 0 = off. Plug Pro/Space never use this field.
+  bool mk2CabSim = false;
 
   //Bluetooth and mic
   EQTenBandBT bluetoothEQ = EQTenBandBT();
@@ -73,6 +78,32 @@ class NuxMightyPlugPro extends NuxReorderableDevice<PlugProPreset>
   NuxPlugProConfiguration get config => _config;
 
   PlugProVersion version = PlugProVersion.PlugPro1;
+
+  /// Whether this device understands the Plug Pro `speccmd_auxeqsave` SysEx.
+  /// The Mighty 20 MKII does not: that command resets its AUX EQ to raw `15`
+  /// (-10.5 dB) instead of storing the live CC values.
+  bool get supportsBTEQGroupSave => true;
+
+  /// Whether `kSYX_BTSET` returns the stored EQ values. The MKII always
+  /// answers with raw `15`, so its values come from CC echoes / local storage.
+  bool get supportsBTEQReadback => true;
+
+  /// Same as above for the USB audio page: the MKII SYSTEMSET reply does not
+  /// carry the live USB settings, so CC echoes / local storage are used.
+  bool get supportsUSBSettingsReadback => true;
+
+  /// MKII-only: remember USB audio settings because the amp has no usable
+  /// read-back for them.
+  void persistMK2UsbAudio() {
+    if (supportsUSBSettingsReadback) return;
+    SharedPrefs().setValue(SettingsKeys.mk2UsbAudio, {
+      'routingMode': config.routingMode,
+      'recLevel': config.recLevel,
+      'playbackLevel': config.playbackLevel,
+      'usbDryWet': config.usbDryWet,
+      'cabSim': config.mk2CabSim,
+    });
+  }
 
   String versionDate = "";
   bool version2024July = true;
@@ -220,26 +251,34 @@ class NuxMightyPlugPro extends NuxReorderableDevice<PlugProPreset>
   @override
   void setUsbMode(int mode) {
     config.routingMode = mode;
+    persistMK2UsbAudio();
     communication.setUsbAudioMode(mode);
   }
 
   @override
   void setUsbRecordingVol(int vol) {
     config.recLevel = vol;
+    persistMK2UsbAudio();
     communication.setUsbInputVolume(vol);
   }
 
   @override
   void setUsbPlaybackVol(int vol) {
     config.playbackLevel = vol;
+    persistMK2UsbAudio();
     communication.setUsbOutputVolume(vol);
   }
 
   @override
   void setUsbDryWetVol(int vol) {
     config.usbDryWet = vol;
+    persistMK2UsbAudio();
     _communication.setUsbDryWet(vol);
   }
+
+  // Only the Mighty 20 MKII implements the global USB Cab Sim setting.
+  @override
+  void setUsbCabSim(bool enabled) {}
 
   @override
   Widget getSettingsWidget() {

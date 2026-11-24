@@ -61,7 +61,7 @@ class _PlugProSettingsState extends State<PlugProSettings> {
                   builder: (context) => const SpaceSpeakerEQSettings()));
             },
           ),
-        if (!widget.mightySpace)
+        if (!widget.mightySpace && widget.device.showMicrophoneSettings)
           ListTile(
             enabled: widget.device.deviceControl.isConnected,
             leading: const Icon(Icons.mic),

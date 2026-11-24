@@ -12,7 +12,10 @@ import 'package:wakelock_plus_platform_interface/messages.g.dart';
 
 AutomationEvent _eventWithPreset(Map<String, dynamic> preset) {
   PresetsStorage().presetsData = [
-    {'name': 'Test', 'presets': [preset]}
+    {
+      'name': 'Test',
+      'presets': [preset]
+    }
   ];
   final event = AutomationEvent(
       eventTime: Duration.zero, type: AutomationEventType.preset);
@@ -24,17 +27,19 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
+    final prefsDir = Directory.systemTemp.createTempSync('mk2_automation_');
     const MethodChannel('plugins.flutter.io/path_provider')
         .setMockMethodCallHandler((call) async {
       if (call.method == 'getApplicationSupportDirectory' ||
           call.method == 'getApplicationDocumentsDirectory' ||
           call.method == 'getExternalStorageDirectory') {
-        return Directory.systemTemp.path;
+        return prefsDir.path;
       }
       return null;
     });
 
-    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     for (final channel in [
       'dev.flutter.pigeon.WakelockPlusApi.toggle',
       'dev.flutter.pigeon.WakelockPlusApi.isEnabled',

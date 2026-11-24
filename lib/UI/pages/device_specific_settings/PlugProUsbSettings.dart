@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:almighty_amp/UI/widgets/thickSlider.dart';
 import 'package:almighty_amp/bluetooth/devices/NuxMightyPlugPro.dart';
 import '../../../bluetooth/NuxDeviceControl.dart';
+import '../../../bluetooth/devices/communication/plugProCommunication.dart';
 import '../../../bluetooth/devices/features/proUsbSettings.dart';
 import '../../widgets/common/modeControlRegular.dart';
 
@@ -57,6 +58,30 @@ class _PlugProUsbSettingsState extends State<PlugProUsbSettings> {
       NuxDeviceControl.instance().device.config as NuxPlugProConfiguration;
   final usbSettings = NuxDeviceControl.instance().device as ProUsbSettings;
   static const fontSize = TextStyle(fontSize: 20);
+
+  @override
+  void initState() {
+    super.initState();
+    NuxDeviceControl.instance().addListener(_onDeviceChanged);
+    // On the MKII the other USB values are not carried by SYSTEMSET, but
+    // Cab Sim is. Request a fresh read-back while this page is open so the
+    // toggle reflects the hardware and the frame is visible when debugging.
+    final communication = NuxDeviceControl.instance().device.communication;
+    if (communication is PlugProCommunication) {
+      communication.requestMK2UsbSettingsReadback();
+    }
+  }
+
+  @override
+  void dispose() {
+    NuxDeviceControl.instance().removeListener(_onDeviceChanged);
+    super.dispose();
+  }
+
+  // MKII USB values arrive as CC echoes; rebuild when the device notifies.
+  void _onDeviceChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void didChangeDependencies() {
@@ -153,6 +178,16 @@ class _PlugProUsbSettingsState extends State<PlugProUsbSettings> {
                           usbSettings.setUsbMode(routeModeInt);
                           setState(() {});
                         }),
+              if (NuxDeviceControl.instance().device.showUsbCabSimSetting)
+                SwitchListTile(
+                  title: const Text("Cab Sim", style: fontSize),
+                  subtitle: const Text("Apply cabinet simulation to USB audio"),
+                  value: config.mk2CabSim,
+                  onChanged: (value) {
+                    usbSettings.setUsbCabSim(value);
+                    setState(() {});
+                  },
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Image.asset(routeMode.schemeAsset),

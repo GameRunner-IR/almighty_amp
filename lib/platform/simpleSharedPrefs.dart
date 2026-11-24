@@ -26,6 +26,10 @@ class SettingsKeys {
   static const String tempoTrainerChangeMode = "trainerChangeMode";
   static const String tempoTrainerChangeUnits = "trainerChangeUnits";
   static const String trackGain = "jamTracksGain";
+  // MKII Bluetooth EQ has no usable SysEx read-back, so its four CC values are
+  // kept locally as a list of 0-100 MIDI values.
+  static const String mk2BluetoothEQ = "mk2BluetoothEQ";
+  static const String mk2UsbAudio = "mk2UsbAudio";
 }
 
 class SharedPrefs {

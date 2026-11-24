@@ -185,18 +185,19 @@ class _SettingsState extends State<Settings> {
                     },
                   ),
                 //Automatically set matching cabinet when changing an amp
-                CheckboxListTile(
-                    title: const Text("Set matching cabinets automatically"),
-                    value:
-                        SharedPrefs().getInt(SettingsKeys.changeCabs, 1) != 0,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value != null) {
-                          SharedPrefs()
-                              .setInt(SettingsKeys.changeCabs, value ? 1 : 0);
-                        }
-                      });
-                    }),
+                if (device.showMatchingCabinetsSetting)
+                  CheckboxListTile(
+                      title: const Text("Set matching cabinets automatically"),
+                      value:
+                          SharedPrefs().getInt(SettingsKeys.changeCabs, 1) != 0,
+                      onChanged: (value) {
+                        setState(() {
+                          if (value != null) {
+                            SharedPrefs()
+                                .setInt(SettingsKeys.changeCabs, value ? 1 : 0);
+                          }
+                        });
+                      }),
                 const Divider(),
                 if (device.deviceControl.isConnected &&
                     device is Tuner &&
@@ -315,7 +316,7 @@ class _SettingsState extends State<Settings> {
             trailing: Text(_version),
             onTap: () {
               devCounter++;
-              if (devCounter == 7) {
+              if (devCounter >= 7) {
                 Settings.devMode = true;
                 SharedPrefs().setInt(SettingsKeys.hiddenSources, 1);
                 setState(() {});

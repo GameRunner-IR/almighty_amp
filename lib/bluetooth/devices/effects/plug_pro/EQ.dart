@@ -286,6 +286,47 @@ class EQTenBandBT extends EQ {
   int get nuxIndex => 0;
 }
 
+/// Bluetooth EQ of the NUX Mighty 20 MKII.
+///
+/// Unlike the Mighty Plug Pro's 10-band graphic EQ, the MKII exposes only a
+/// Volume/Bass/Mid/Treble tone stack. Its kSYX_BTSET reply is a hardcoded raw
+/// 15 (-10.5 dB) and cannot be used for read-back, so values are restored from
+/// local storage and updated from incoming CC echoes.
+class EQFourBandBTMk2 extends EQTenBandBT {
+  EQFourBandBTMk2() {
+    parameters = [
+      Parameter(
+          name: "Volume",
+          handle: "eq_vol",
+          value: -10.5,
+          formatter: ValueFormatters.decibelEQ,
+          devicePresetIndex: PresetDataIndexPlugPro.EQ_Para1,
+          midiCC: MidiCCValuesPro.AUX_BAND_1),
+      Parameter(
+          name: "Bass",
+          handle: "eq_b1",
+          value: -10.5,
+          formatter: ValueFormatters.decibelEQ,
+          devicePresetIndex: PresetDataIndexPlugPro.EQ_Para2,
+          midiCC: MidiCCValuesPro.AUX_BAND_2),
+      Parameter(
+          name: "Mid",
+          handle: "eq_b2",
+          value: -10.5,
+          formatter: ValueFormatters.decibelEQ,
+          devicePresetIndex: PresetDataIndexPlugPro.EQ_Para3,
+          midiCC: MidiCCValuesPro.AUX_BAND_3),
+      Parameter(
+          name: "Treble",
+          handle: "eq_b3",
+          value: -10.5,
+          formatter: ValueFormatters.decibelEQ,
+          devicePresetIndex: PresetDataIndexPlugPro.EQ_Para4,
+          midiCC: MidiCCValuesPro.AUX_BAND_4),
+    ];
+  }
+}
+
 class EQTenBandSpeaker extends EQ {
   @override
   List<Parameter> parameters = [

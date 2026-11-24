@@ -27,7 +27,20 @@ class _PlugProEQSettingsState extends State<PlugProEQSettings> {
   @override
   void initState() {
     super.initState();
+    NuxDeviceControl.instance().addListener(_onDeviceChanged);
     _requestEQData(device.config.bluetoothGroup);
+  }
+
+  @override
+  void dispose() {
+    NuxDeviceControl.instance().removeListener(_onDeviceChanged);
+    super.dispose();
+  }
+
+  // MKII EQ values arrive as CC echoes from the amplifier (the same way the
+  // effect editor follows hardware knobs), so rebuild when the device notifies.
+  void _onDeviceChanged() {
+    if (mounted) setState(() {});
   }
 
   void _requestEQData(int index) {
@@ -100,9 +113,19 @@ class _PlugProEQSettingsState extends State<PlugProEQSettings> {
           builder: (context, AsyncSnapshot<List<int>> snapshot) {
             if (snapshot.connectionState == ConnectionState.done &&
                 _requestInProgress) {
-              btEQ.setupFromNuxPayload(snapshot.data!);
-              device.config.bluetoothInvertChannel = snapshot.data![12] > 0;
-              device.config.bluetoothEQMute = snapshot.data![13] > 0;
+              final eqData = snapshot.data;
+              // The MKII SysEx reply is always raw 15 and must not overwrite
+              // the locally restored / CC-echoed values.
+              if (device.supportsBTEQReadback) {
+                // Guard against short/truncated replies before indexing.
+                if (eqData != null && eqData.length >= btEQ.parameters.length) {
+                  btEQ.setupFromNuxPayload(eqData);
+                  if (eqData.length > 13) {
+                    device.config.bluetoothInvertChannel = eqData[12] > 0;
+                    device.config.bluetoothEQMute = eqData[13] > 0;
+                  }
+                }
+              }
               _requestInProgress = false;
             }
             return ListTileTheme(
@@ -152,7 +175,11 @@ class _PlugProEQSettingsState extends State<PlugProEQSettings> {
   void _changeEQValue(Parameter parameter, double value, bool skip) {
     parameter.value = value;
     setState(() {
-      if (!skip) NuxDeviceControl.instance().sendParameter(parameter, false);
+      if (!skip) {
+        debugPrint(
+            "BT EQ: write band=${parameter.name} cc=${parameter.midiCC} value=$value midi=${parameter.midiValue}");
+        NuxDeviceControl.instance().sendParameter(parameter, false);
+      }
     });
   }
 }

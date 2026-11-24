@@ -28,17 +28,19 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
+    final prefsDir = Directory.systemTemp.createTempSync('mk2_qr_export_');
     const MethodChannel('plugins.flutter.io/path_provider')
         .setMockMethodCallHandler((call) async {
       if (call.method == 'getApplicationSupportDirectory' ||
           call.method == 'getApplicationDocumentsDirectory' ||
           call.method == 'getExternalStorageDirectory') {
-        return Directory.systemTemp.path;
+        return prefsDir.path;
       }
       return null;
     });
 
-    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     for (final channel in [
       'dev.flutter.pigeon.WakelockPlusApi.toggle',
       'dev.flutter.pigeon.WakelockPlusApi.isEnabled',
@@ -73,8 +75,9 @@ void main() {
 
   test('MKII QR export leaves the CAB block empty', () {
     final device = NuxMighty20Mk2(NuxDeviceControl.instance());
-    final data = base64Decode(
-        device.channelToQR(device.selectedNuxIndex).substring(QrUtils.nuxQRPrefix.length));
+    final data = base64Decode(device
+        .channelToQR(device.selectedNuxIndex)
+        .substring(QrUtils.nuxQRPrefix.length));
 
     int payload(int index) => data[_prefixLength + index];
 
@@ -114,13 +117,13 @@ void main() {
     final device = NuxMighty20Mk2(NuxDeviceControl.instance());
     final preset = device.presets.first;
 
-    final report = preset.setupPresetFromQRDataReport(officialMk2Qr,
-        sendToDevice: false);
+    final report =
+        preset.setupPresetFromQRDataReport(officialMk2Qr, sendToDevice: false);
     expect(report.isOk, isTrue);
 
-    final order = (device.communication as PlugProCommunication).buildSlotOrder();
+    final order =
+        (device.communication as PlugProCommunication).buildSlotOrder();
     expect(order, [9, 5, 1, 2, 3, 4, 6, 7, 8, 0]);
-    expect(order.sublist(1),
-        isNot(contains(PresetDataIndexPlugPro.Head_iCAB)));
+    expect(order.sublist(1), isNot(contains(PresetDataIndexPlugPro.Head_iCAB)));
   });
 }

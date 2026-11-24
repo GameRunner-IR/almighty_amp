@@ -23,6 +23,68 @@ class PlugProCommunication extends DeviceCommunication {
   StreamController<List<int>>? _bluetoothEQReceived;
   Stream<List<int>>? get bluetoothEQStream => _bluetoothEQReceived?.stream;
 
+  /// True only for the Mighty 20 MKII, whose USB settings are kept locally
+  /// because its `SYSTEMSET` reply does not carry the live Plug Pro values.
+  bool get _isMK2Usb =>
+      device is NuxMightyPlugPro &&
+      !(device as NuxMightyPlugPro).supportsUSBSettingsReadback;
+
+  /// Last complete MKII SYSTEMSET reply, used as a template for writes.
+  List<int>? _lastMK2SystemSet;
+
+  /// A toggle request that arrived before the first SYSTEMSET reply.
+  bool? _pendingMK2CabSim;
+
+  String _dumpIndexed(List<int> data) => data
+      .asMap()
+      .entries
+      .map((entry) => "${entry.key}:${entry.value}")
+      .join(" ");
+
+  /// Ask the MKII for a fresh copy of the global state that backs the USB
+  /// Audio Settings page. Cab Sim lives in SYSTEMSET payload byte 5; the
+  /// other USB values arrive through CC echoes instead.
+  void requestMK2UsbSettingsReadback() {
+    if (!device.deviceControl.isConnected || !_isMK2Usb) return;
+    final systemSet = _requestSystemSettings();
+    final currentState = _requestMicSettings();
+    debugPrint("USB Audio: request SYSTEMSET bytes=$systemSet");
+    debugPrint("USB Audio: request CURSTATE bytes=$currentState");
+    device.deviceControl.sendBLEData(systemSet);
+    device.deviceControl.sendBLEData(currentState);
+  }
+
+  /// Set the MKII-only global Cab Sim flag. The hardware accepts a complete
+  /// SYSTEMSET frame, so the last reply is reused as a template and only the
+  /// Cab Sim byte is changed. This never touches the Plug Pro CAB effect block.
+  void setMK2CabSim(bool enabled) {
+    if (!_isMK2Usb || !device.deviceControl.isConnected) return;
+
+    final template = _lastMK2SystemSet;
+    if (template == null || template.length < 23) {
+      // The USB page requests a readback on open. Keep the user's choice and
+      // send it as soon as that reply supplies a valid template.
+      _pendingMK2CabSim = enabled;
+      debugPrint("USB Audio: Cab Sim waiting for SYSTEMSET template");
+      requestMK2UsbSettingsReadback();
+      return;
+    }
+
+    final data = buildMK2CabSimMessage(enabled, template);
+    debugPrint("USB Audio: SET Cab Sim=${enabled ? 1 : 0} bytes=$data");
+    device.deviceControl.sendBLEData(data);
+  }
+
+  /// Build the SET frame from a captured SYSTEMSET reply. The reply is
+  /// [direction, fields..., checksum, 0xF7]; only reply field 4 (payload index
+  /// 5) changes. Exposed so the byte layout can be locked down by tests.
+  List<int> buildMK2CabSimMessage(bool enabled, List<int> template) {
+    final fields = List<int>.from(template.sublist(1, template.length - 2));
+    fields[4] = enabled ? 1 : 0;
+    return createSysExMessagePro(SysexPrivacy.kSYSEX_PRIVATE,
+        SyxMsg.kSYX_SYSTEMSET, SyxDir.kSYXDIR_SET, fields);
+  }
+
   StreamController<List<int>>? _speakerEQReceived;
   Stream<List<int>>? get speakerEQStream => _speakerEQReceived?.stream;
 
@@ -152,8 +214,12 @@ class PlugProCommunication extends DeviceCommunication {
     if (!device.deviceControl.isConnected) return;
     var data = createSysExMessagePro(SysexPrivacy.kSYSEX_PRIVATE,
         SyxMsg.kSYX_BTSET, SyxDir.kSYXDIR_REQ, [index]);
-    device.deviceControl.sendBLEData(data);
+    debugPrint("BT EQ: request group=$index bytes=$data");
+    // Retire any previous controller and create the new one before sending,
+    // so a fast reply cannot be missed and a closed controller cannot leak.
+    _bluetoothEQReceived?.close();
     _bluetoothEQReceived = StreamController<List<int>>();
+    device.deviceControl.sendBLEData(data);
   }
 
   void requestSpeakerEQData(int index) {
@@ -364,17 +430,39 @@ class PlugProCommunication extends DeviceCommunication {
   void setBTEq(int eq) {
     if (!device.deviceControl.isConnected) return;
     var data = createCCMessage(MidiCCValuesPro.AUXEQENABLE, eq);
+    debugPrint("BT EQ: set group=$eq bytes=$data");
     device.deviceControl.sendBLEData(data);
   }
 
   void saveBTEQGroup(int group) {
     if (!device.deviceControl.isConnected) return;
+
+    if (device is NuxMightyPlugPro &&
+        !(device as NuxMightyPlugPro).supportsBTEQGroupSave) {
+      // The MKII applies AUX EQ CCs immediately. Sending the Plug Pro save
+      // SysEx to it resets every band to raw 15 (-10.5 dB), so re-send the
+      // live values instead of issuing that command.
+      debugPrint("BT EQ: MKII skip auxeqsave, re-sending live CC values");
+      for (final param in config.bluetoothEQ.parameters) {
+        final ccData = createCCMessage(param.midiCC, param.midiValue);
+        debugPrint("BT EQ: SAVE band=${param.name} bytes=$ccData");
+        device.deviceControl.sendBLEData(ccData);
+      }
+      // No usable hardware read-back exists, so keep the saved values locally.
+      SharedPrefs().setValue(
+          SettingsKeys.mk2BluetoothEQ,
+          config.bluetoothEQ.parameters
+              .map((param) => param.midiValue)
+              .toList());
+      return;
+    }
+
     var data = createSysExMessagePro(
         SysexPrivacy.kSYSEX_PRIVATE,
         SyxMsg.kSYX_SPEC_CMD,
         SyxDir.kSYXDIR_SET,
         [SysCtrlState.speccmd_auxeqsave, group]);
-
+    debugPrint("BT EQ: SAVE group=$group bytes=$data");
     device.deviceControl.sendBLEData(data);
   }
 
@@ -842,11 +930,43 @@ class PlugProCommunication extends DeviceCommunication {
 };
 */
   void _handleSystemSettings(List<int> data) {
+    // A SET can be answered with a short ACK. It is not a full SYSTEMSET
+    // payload, so none of the indexed fields below are available.
+    if (data.length < 22) {
+      debugPrint(
+          "USB Audio: short SYSTEMSET ignored len=${data.length} data=$data");
+      return;
+    }
+    if (_isMK2Usb) {
+      debugPrint("USB Audio: SYSTEMSET payload=${_dumpIndexed(data)}");
+      // Unlike the other USB values, byte 5 is a real MKII Cab Sim readback
+      // (1 = on, 0 = off). Keep the full reply as a template for writes.
+      _lastMK2SystemSet = List<int>.from(data);
+      if (data.length > 5) {
+        final readback = data[5] > 0;
+        if (config.mk2CabSim != readback) {
+          config.mk2CabSim = readback;
+          (device as NuxMightyPlugPro).persistMK2UsbAudio();
+          device.deviceControl.forceNotifyListeners();
+        }
+        debugPrint("USB Audio: Cab Sim readback=${readback ? 1 : 0}");
+      }
+      final pending = _pendingMK2CabSim;
+      if (pending != null) {
+        _pendingMK2CabSim = null;
+        setMK2CabSim(pending);
+      }
+    }
     config.micMute = data[1] > 0;
-    config.routingMode = data[18];
-    config.recLevel = data[16];
-    config.playbackLevel = data[17];
-    config.usbDryWet = data[19];
+    // MKII SYSTEMSET does not carry the live USB values. Keep the locally
+    // restored / CC-echoed values instead of overwriting them.
+    if (device is! NuxMightyPlugPro ||
+        (device as NuxMightyPlugPro).supportsUSBSettingsReadback) {
+      config.routingMode = data[18];
+      config.recLevel = data[16];
+      config.playbackLevel = data[17];
+      config.usbDryWet = data[19];
+    }
     config.micVolume = data[21];
     for (int i = 0; i < config.activeChannels.length; i++) {
       config.activeChannels[i] = ((data[20] >> i) & 1) != 0;
@@ -867,7 +987,7 @@ const z = {
 };
 */
   void _handleDrumData(List<int> data) {
-    if (data[0] == SyxDir.kSYXDIR_REQ && data.length >= 8) {
+    if (data[0] == SyxDir.kSYXDIR_REQ && data.length >= 9) {
       config.drumsEnabled = data[1] != 0;
       config.selectedDrumStyle = data[2];
       config.drumsVolume = data[3].toDouble();
@@ -886,6 +1006,11 @@ const z = {
   }
 
   void _handleMicSettings(List<int> data) {
+    if (_isMK2Usb) {
+      debugPrint("USB Audio: CURSTATE payload=${_dumpIndexed(data)}");
+    }
+    // A short ACK does not carry the mic/Speaker EQ fields below.
+    if (data.length < 6) return;
     if (data[0] == SyxDir.kSYXDIR_REQ) {
       config.bluetoothGroup = data[2];
       config.micNoiseGate = data[3] > 0;
@@ -901,14 +1026,76 @@ const z = {
     }
   }
 
+  /// MKII USB audio values arrive as CC echoes, like the effect editor knobs.
+  bool _handleUsbAudioCCData(int cc, int value) {
+    if (device is! NuxMightyPlugPro) return false;
+    if ((device as NuxMightyPlugPro).supportsUSBSettingsReadback) return false;
+
+    switch (cc) {
+      case MidiCCValuesPro.USBROUNT_1:
+        config.recLevel = value;
+        break;
+      case MidiCCValuesPro.USBROUNT_2:
+        config.playbackLevel = value;
+        break;
+      case MidiCCValuesPro.USBROUNT_3:
+        config.routingMode = value;
+        break;
+      case MidiCCValuesPro.USBROUNT_4:
+        config.usbDryWet = value;
+        break;
+      default:
+        return false;
+    }
+    debugPrint("USB Audio: CC echo cc=$cc value=$value");
+    (device as NuxMightyPlugPro).persistMK2UsbAudio();
+    device.deviceControl.forceNotifyListeners();
+    return true;
+  }
+
+  /// MKII AUX EQ values arrive as CC echoes (the same path the effect editor
+  /// uses for hardware knobs), since its kSYX_BTSET reply is only raw `15`.
+  bool _handleBTEQCCData(int cc, int value) {
+    if (device is! NuxMightyPlugPro) return false;
+    if ((device as NuxMightyPlugPro).supportsBTEQReadback) return false;
+
+    final eq = config.bluetoothEQ;
+    int? changedIndex;
+    for (int i = 0; i < eq.parameters.length; i++) {
+      if (eq.parameters[i].midiCC == cc) {
+        changedIndex = i;
+        break;
+      }
+    }
+    if (changedIndex == null) return false;
+
+    eq.parameters[changedIndex].midiValue = value;
+    debugPrint(
+        "BT EQ: CC echo band=${eq.parameters[changedIndex].name} cc=$cc value=$value");
+    SharedPrefs().setValue(SettingsKeys.mk2BluetoothEQ,
+        eq.parameters.map((param) => param.midiValue).toList());
+    device.deviceControl.forceNotifyListeners();
+    return true;
+  }
+
   void _handleBTEqData(List<int> data) {
-    if (data[0] == SyxDir.kSYXDIR_REQ) {
-      _bluetoothEQReceived?.add(data.sublist(2));
+    if (data.isEmpty) return;
+    debugPrint("BT EQ: reply dir=${data[0]} raw=$data");
+    // Reply direction can be REQ (Plug Pro) or GET (MKII) depending on the
+    // request we sent, so accept both.
+    if (data[0] == SyxDir.kSYXDIR_REQ || data[0] == SyxDir.kSYXDIR_GET) {
+      final payload = data.length > 2 ? data.sublist(2) : <int>[];
+      debugPrint("BT EQ: band payload=$payload");
+      _bluetoothEQReceived?.add(payload);
       _bluetoothEQReceived?.close();
+      // Null it so a later unsolicited BTSET message cannot add to a closed
+      // controller (mirrors _handleSpeakerEqData).
+      _bluetoothEQReceived = null;
     }
   }
 
   void _handleSpeakerEqData(List<int> data) {
+    if (data.isEmpty) return;
     if (data[0] == SyxDir.kSYXDIR_REQ) {
       _speakerEQReceived?.add(data.sublist(2));
       _speakerEQReceived?.close();
@@ -922,6 +1109,14 @@ const z = {
   @override
   void onDataReceive(List<int> data) {
     if (data.length > 2) {
+      // Keep short MKII messages visible in the Debug Console so USB
+      // read-backs can be verified. Preset chunks are large and skipped.
+      final isCC = data[2] == MidiMessageValues.controlChange;
+      final isShortSysEx =
+          data[2] == MidiMessageValues.sysExStart && data.length < 32;
+      if (_isMK2Usb && (isCC || isShortSysEx)) {
+        debugPrint("MKII RX: $data");
+      }
       switch (data[2]) {
         case MidiMessageValues.controlChange:
           switch (data[3]) {
@@ -945,6 +1140,18 @@ const z = {
             case MidiCCValuesPro.LOOPSTATE:
             case MidiCCValuesPro.LOOP_ARNR:
               _handleLooperCC(data[3], data[4]);
+              break;
+            case MidiCCValuesPro.AUX_BAND_1:
+            case MidiCCValuesPro.AUX_BAND_2:
+            case MidiCCValuesPro.AUX_BAND_3:
+            case MidiCCValuesPro.AUX_BAND_4:
+              if (_handleBTEQCCData(data[3], data[4])) return;
+              break;
+            case MidiCCValuesPro.USBROUNT_1:
+            case MidiCCValuesPro.USBROUNT_2:
+            case MidiCCValuesPro.USBROUNT_3:
+            case MidiCCValuesPro.USBROUNT_4:
+              if (_handleUsbAudioCCData(data[3], data[4])) return;
           }
           bool consumed = false;
           consumed = _handleDrumCCData(data[3], data[4]);
@@ -1000,6 +1207,10 @@ const z = {
                   _handleLooperSysEx(data.sublist(7));
                   return;
                 case SyxMsg.kSYX_SENDCMD:
+                  if (_isMK2Usb) {
+                    debugPrint(
+                        "USB Audio: SENDCMD cmd=${data[8]} payload=${_dumpIndexed(data.sublist(8))}");
+                  }
                   if (data[7] == SyxDir.kSYXDIR_REQ) {
                     switch (data[8]) {
                       case SyxMsg.kSYX_MODULELINK:
@@ -1009,6 +1220,20 @@ const z = {
                       case SyxMsg.kSYX_DRUM:
                         //request drums data
                         device.deviceControl.sendBLEData(_requestDrumData());
+                        break;
+                      case SyxMsg.kSYX_SYSTEMSET:
+                        // The MKII asks connected controllers to re-read the
+                        // global state after a USB settings change (Cab Sim).
+                        if (_isMK2Usb) {
+                          device.deviceControl
+                              .sendBLEData(_requestSystemSettings());
+                        }
+                        break;
+                      case SyxMsg.kSYX_CURSTATE:
+                        if (_isMK2Usb) {
+                          device.deviceControl
+                              .sendBLEData(_requestMicSettings());
+                        }
                         break;
                     }
                   }

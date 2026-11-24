@@ -2,6 +2,9 @@
 // This code is licensed under MIT license (see LICENSE.md for details)
 
 import 'NuxMightyPlugPro.dart';
+import 'communication/plugProCommunication.dart';
+import '../../platform/simpleSharedPrefs.dart';
+import 'effects/plug_pro/EQ.dart';
 import 'presets/Mighty20Mk2Preset.dart';
 
 /// A Mighty 20 MKII patch: one physical preset and one Pro Scene inside it.
@@ -74,6 +77,63 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
       presets.add(Mighty20Mk2Preset(
           device: this, channel: i, channelName: "${patch.preset + 1}"));
     }
+    // The MKII Bluetooth EQ is a Volume/Bass/Mid/Treble tone stack. Its
+    // kSYX_BTSET reply is always raw 15, so the values are restored locally.
+    config.bluetoothEQ = EQFourBandBTMk2();
+    _restoreBluetoothEQ();
+    _restoreUsbAudio();
+  }
+
+  void _restoreBluetoothEQ() {
+    final stored = SharedPrefs().getValue(SettingsKeys.mk2BluetoothEQ, null);
+    if (stored is! List) return;
+    final eq = config.bluetoothEQ;
+    for (int i = 0; i < eq.parameters.length && i < stored.length; i++) {
+      final raw = stored[i];
+      if (raw is int && raw >= 0 && raw <= 100) {
+        eq.parameters[i].midiValue = raw;
+      }
+    }
+  }
+
+  @override
+  bool get supportsBTEQGroupSave => false;
+
+  @override
+  bool get supportsBTEQReadback => false;
+
+  @override
+  bool get supportsUSBSettingsReadback => false;
+
+  void _restoreUsbAudio() {
+    final stored = SharedPrefs().getValue(SettingsKeys.mk2UsbAudio, null);
+    if (stored is! Map) return;
+    if (stored['routingMode'] is int) {
+      config.routingMode = stored['routingMode'] as int;
+    }
+    if (stored['recLevel'] is int) {
+      config.recLevel = stored['recLevel'] as int;
+    }
+    if (stored['playbackLevel'] is int) {
+      config.playbackLevel = stored['playbackLevel'] as int;
+    }
+    if (stored['usbDryWet'] is int) {
+      config.usbDryWet = stored['usbDryWet'] as int;
+    }
+    if (stored['cabSim'] is bool) {
+      config.mk2CabSim = stored['cabSim'] as bool;
+    }
+  }
+
+  /// Global USB setting from SYSTEMSET payload byte 5 (1 = on, 0 = off).
+  /// This is unrelated to the Plug Pro CAB effect block, which stays disabled
+  /// on the MKII.
+  @override
+  void setUsbCabSim(bool enabled) {
+    config.mk2CabSim = enabled;
+    persistMK2UsbAudio();
+    (communication as PlugProCommunication).setMK2CabSim(enabled);
+    deviceControl.forceNotifyListeners();
   }
 
   @override
@@ -93,6 +153,15 @@ class NuxMighty20Mk2 extends NuxMightyPlugPro {
 
   @override
   bool get cabinetSupport => false;
+
+  @override
+  bool get showMatchingCabinetsSetting => false;
+
+  @override
+  bool get showMicrophoneSettings => false;
+
+  @override
+  bool get showUsbCabSimSetting => true;
 
   @override
   bool get hackableIRs => false;

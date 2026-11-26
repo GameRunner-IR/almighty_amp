@@ -1,1 +1,1 @@
-An alternative app for controlling NUX Mighty amps series.
+An alternative app for controlling NUX Mighty amps, including Mighty 20 MKII.
